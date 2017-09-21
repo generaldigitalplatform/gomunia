@@ -34,7 +34,7 @@ var ProductOwnerSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ['ProductOwner'],
-        default: 'productowner'
+        default: 'ProductOwner'
     },    
     resetPasswordToken:String,
     resetPasswordExpires:Date
