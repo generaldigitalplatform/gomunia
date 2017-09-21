@@ -24,8 +24,8 @@ var googleMapsRoute = require('./api/routes/googleMaps');
 
 var port = 3000;
 var httpServer = require('http').createServer(app);
-//httpServer.listen(process.env.PORT,process.env.IP, function() {
-httpServer.listen(port, function() {
+httpServer.listen(process.env.PORT,process.env.IP, function() {
+//httpServer.listen(port, function() {
     console.log('gdmp-server running on port ' + port + '.');
 });
 
