@@ -10,7 +10,7 @@ app.options('*', cors());
 var connectionOptions = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } }, 
                 replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS : 30000 } } }; 
 
-mongoose.connect(db.databaseUri,connectionOptions);
+mongoose.connect(db.databaseUri,{useMongoClient:true});//,socketTimeoutMS:360000, connectTimeoutMS : 30000,keepAlive: true, reconnectTries: 30});
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -26,7 +26,7 @@ var port = 3000;
 var httpServer = require('http').createServer(app);
 httpServer.listen(process.env.PORT,process.env.IP, function() {
 //httpServer.listen(port, function() {
-    console.log('gdmp-server running on port ' + port + '.');
+    console.log('gomunia-server running on port ' + port + '.');
 });
 
 productOwnerRoute(app);
