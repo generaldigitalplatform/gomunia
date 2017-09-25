@@ -71,10 +71,10 @@ exports.pushMessageToDevice = function(req,res){
 	admin.messaging().sendToDevice(registrationToken, payload)
 		.then(function(response) {
 			res.json(response);
-			console.log("Successfully sent message:", response);
+			//console.log("Successfully sent message:", response);
 		})
 		.catch(function(error) {
-			console.log("Error sending message:", error);
+			//console.log("Error sending message:", error);
 			res.json(error);
 		});
 	});
