@@ -48,10 +48,13 @@ exports.pushMessageToDevice = function(req,res){
 
 	pushMessageModel.findOne(query,function(err, response){
 	if(err){
-		res.send(err);
+		return res.send(err);
 	}
 	
 	// This registration token comes from the client FCM SDKs.
+	if(!response){
+		return res.send("Client not registered for FCM");
+	}
 	var registrationToken = response.FCMregistrationToken; //"bk3RNwTe3H0:CI2k_HHwgIpoDKCIZvvDMExUdFQ3P1...";
 	// var mesg= req.body.message.split(',');
 	// mess = mesg[0] + ","  + mesg[1];
