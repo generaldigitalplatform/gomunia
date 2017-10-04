@@ -16,15 +16,26 @@ exports.findAllJobs = function(req,res){
 	var startTime = "T00:00:00.000Z";
 	var toTime = "T23:59:00.000Z";;
 
-	var empId = req.param('EmpId');
-	var employerId = req.param('employerid');
-	var jobDates = req.param('JobDates');
-	var jobStatus = req.param('JobStatus');
-	var fieldForce = req.param('FieldForce');
-	var customer = req.param('Customer');
-	var phone = req.param('Phone');
-	var jobId = req.param('JobId');
-	var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+	var empId = req.query.EmpId;
+	var employerId = req.query.employerid;
+	var jobDates = req.query.JobDates;
+	var jobStatus = req.query.JobStatus;
+	var fieldForce = req.query.FieldForce;
+	var customer = req.query.Customer;
+	var phone = req.query.Phone;
+	var jobId = req.query.JobId;
+
+
+	// var empId = req.param('EmpId');
+	// var employerId = req.param('employerid');
+	// var jobDates = req.param('JobDates');
+	// var jobStatus = req.param('JobStatus');
+	// var fieldForce = req.param('FieldForce');
+	// var customer = req.param('Customer');
+	// var phone = req.param('Phone');
+	// var jobId = req.param('JobId');
+
+	//var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 	// var jobTitle = req.param('JobTitle');
 	// var jobDescription = req.param('JobDescription');
 	if(employerId && employerId.length !== 0) {
@@ -83,8 +94,8 @@ exports.findAllJobs = function(req,res){
 		}
 		else if(jobDates.length !== 0 && jobDates === '5') {
 
-			lteQuery = moment().subtract(1, 'months').startOf('month').format("YYYY-MM-DD")+startTime;
-			gteQuery = moment().subtract(1, 'months').endOf('month').format("YYYY-MM-DD")+toTime;
+			gteQuery = moment().subtract(1, 'months').startOf('month').format("YYYY-MM-DD")+startTime;
+			lteQuery = moment().subtract(1, 'months').endOf('month').format("YYYY-MM-DD")+toTime;
 			query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
 		}
 		else if(jobDates.length !== 0 && jobDates === '6') {
