@@ -358,7 +358,7 @@ exports.editJobById = function(req,res){
 		query = {"JobId":Number(req.params.Id)};
 	}
 
-	if(updateData.JobStatus === '6'){
+	if(updateData.JobStatus === '6' || updateData.JobStatus === '3'){
 		jobModel.findOneAndUpdate(query,{$set:{"JobTitle":updateData.JobTitle,"JobDescription":updateData.JobDescription,"JobDoneTime":updateData.JobDoneTime,"JobCancelTime":updateData.JobCancelTime,
 		"JobFeedback":updateData.JobFeedback,"JobScheduledTime":updateData.JobScheduledTime,
 		"JobCreatedBy":updateData.JobCreatedBy,"StartedLocation.DateTime":"","StartedLocation.Area":"","StartedLocation.Coordinates":[],
