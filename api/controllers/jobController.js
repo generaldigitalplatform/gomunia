@@ -359,7 +359,8 @@ exports.editJobById = function(req,res){
 	}
 
 	if(updateData.JobStatus === '6'){
-		jobModel.findOneAndUpdate(query,{$set:{"JobTitle":updateData.JobTitle,"JobDescription":updateData.JobDescription,"JobScheduledTime":updateData.JobScheduledTime,
+		jobModel.findOneAndUpdate(query,{$set:{"JobTitle":updateData.JobTitle,"JobDescription":updateData.JobDescription,"JobDoneTime":updateData.JobDoneTime,"JobCancelTime":updateData.JobCancelTime,
+		"JobFeedback":updateData.JobFeedback,"JobScheduledTime":updateData.JobScheduledTime,
 		"JobCreatedBy":updateData.JobCreatedBy,"StartedLocation.DateTime":"","StartedLocation.Area":"","StartedLocation.Coordinates":[],
 		"ReachedLocation.DateTime":"","ReachedLocation.Area":"","ReachedLocation.Coordinates":[],
 		"CancelledLocation.DateTime":"","CancelledLocation.Area":"","CancelledLocation.Coordinates":[],
