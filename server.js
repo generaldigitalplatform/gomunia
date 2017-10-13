@@ -27,8 +27,7 @@ var productOwnerRoute = require('./api/routes/productOwnerRoute');
 var jobRoute = require('./api/routes/jobRoute');
 var pushMessageRoute = require('./api/routes/PushMessageRoute');
 var googleMapsRoute = require('./api/routes/googleMaps');
-
-var port = 3000;
+//var port = 3000;
 var httpServer = require('http').createServer(app);
 httpServer.listen(port,ip, function() {
 //httpServer.listen(port, function() {
