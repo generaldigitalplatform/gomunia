@@ -29,7 +29,7 @@ exports.findGeoLocation = function(req,res){
 
 	geocoder.reverse({lat:lat, lon:lng}, function(err, response) {
 		if(err){
-			res.json(error);
+			return res.json(err);
 		}
 	// });
 

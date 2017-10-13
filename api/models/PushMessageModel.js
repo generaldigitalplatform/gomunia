@@ -9,3 +9,4 @@ var FCMSchema = new Schema({
 },{timestamps:true},{"strict":false});
 
 module.exports = mongoose.model("FCM",FCMSchema);
+

@@ -1,14 +1,27 @@
 var mongoose 		 = require('mongoose'),
  	admin 			 = require('firebase-admin'),
- 	serviceAccount 	 = require('../config/gdsfieldforce-firebase-adminsdk-m5ezh-beffa09b38')
-	pushMessageModel = require('../models/PushMessageModel');
-
-	admin.initializeApp({
+ 	serviceAccount 	 = require('../config/gdsfieldforce-firebase-adminsdk-m5ezh-beffa09b38'),
+	pushMessageModel = require('../models/PushMessageModel'),
+	messageModel 	 = require('../models/MessageModel'),
+    multer			 = require('multer'),
+	path 			 = require('path'),
+	logger              = require('../../utils/logger');
+	
+ 
+ 	admin.initializeApp({
 	  credential: admin.credential.cert(serviceAccount),
 	  databaseURL: "https://gdsfieldforce.firebaseio.com/"
 	});
 
-//var serverkey = 'AAAAUGGsxGs:APA91bF1qVPPcbsSvYAbtcJzslTVFUEk3hpZOJWwbR_Rc8MBDZXpH8Bxf4Rn-SWXX4TxpMGF-3YWHDNC97i-wIxC4qPDq_htpsNr-eKTjOMKf7jftuKQD_nTOc_ZVIxNg7KscviAZUj8';  
+	var storage = multer.diskStorage({
+	  destination: function (req, file, cb) {
+	    cb(null, './public/')
+	  },
+	  filename: function (req, file, cb) {
+	    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+	  }
+	})
+
 //fcm controller
 exports.saveFCMregistrationToken = function(req,res){
 	res.header("Access-Control-Allow-Origin", "*");
@@ -44,13 +57,13 @@ exports.saveFCMregistrationToken = function(req,res){
 exports.pushMessageToDevice = function(req,res){
 	res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    
     var query = {"UserId":req.body.UserId}
 
 	pushMessageModel.findOne(query,function(err, response){
 	if(err){
 		return res.send(err);
-	}
-	
+	}	
 	// This registration token comes from the client FCM SDKs.
 	if(!response){
 		return res.send("Client not registered for FCM");
@@ -81,9 +94,74 @@ exports.pushMessageToDevice = function(req,res){
 			res.json(error);
 		});
 	});
-
 }; 
 
+// router.post('/', upload.single('imageupload'),function(req, res) {
+//   res.send("File upload sucessfully.");
+// });
+
+
+exports.chatMessageToDevice = function(req,res){
+	res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    
+	var query = {"UserId":req.body.UserId}
+
+	pushMessageModel.findOne(query,function(err, response){
+	// if(err){
+	// 	return res.send(err);
+	// }
+	
+	// // This registration token comes from the client FCM SDKs.
+	// if(!response){
+	// 	return res.send("Client not registered for FCM");
+	// }
+	// var registrationToken = response.FCMregistrationToken; //"bk3RNwTe3H0:CI2k_HHwgIpoDKCIZvvDMExUdFQ3P1...";
+
+	if(req.query.messageType === '1'){
+
+		var upload = multer({
+		storage: storage,
+		fileFilter: function(req, file, callback) {
+			var ext = path.extname(file.originalname)
+			if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
+				return callback(res.end('Only images are allowed'), null)
+			}
+			callback(null, true)
+		}
+		}).single('file');
+		upload(req, res, function(err) {
+			res.send('File is uploaded');
+			logger.info(err);
+		})
+
+	}
+	// var mesg= req.body.message.split(',');
+	// mess = mesg[0] + ","  + mesg[1];
+	// See the "Defining the message payload" section below for details
+	// on how to define a message payload.
+	var payload = {
+	  // notification: {
+	  //   title: req.body.notification.title,
+	  //   body: req.body.notification.body
+	  // },
+	  data: {
+	    message:req.body.message
+	  }
+	};
+	// Send a message to the device corresponding to the provided
+	// registration token.
+	// admin.messaging().sendToDevice(registrationToken, payload)
+	// 	.then(function(response) {
+	// 		res.json(response);
+	// 		//console.log("Successfully sent message:", response);
+	// 	})
+	// 	.catch(function(error) {
+	// 		//console.log("Error sending message:", error);
+	// 		res.json(error);
+	// 	});
+	});
+}; 
 
 
 

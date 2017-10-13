@@ -11,6 +11,8 @@ module.exports = function(app){
 
  pushMessageRoute.post('/message',pushMessageController.pushMessageToDevice);
  pushMessageRoute.post('/regtoken',pushMessageController.saveFCMregistrationToken);
+ pushMessageRoute.post('/chat',pushMessageController.chatMessageToDevice);
+
 
  app.use('/api',router);
 }

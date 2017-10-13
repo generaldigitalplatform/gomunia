@@ -2,8 +2,13 @@ var express 	= require('express'),
 	app 		= express(),	
 	mongoose 	= require('mongoose'),
 	bodyParser  = require('body-parser'),
-	cors = require("cors"),
-	db = require('./api/config/database');
+	cors 		= require("cors"),	
+	db 			= require('./api/config/database'),
+	path 		= require('path'),
+	logger 		= require('./utils/logger');
+	port 		= process.env.PORT;
+	ip 	 		= process.env.IP;
+
 
 app.options('*', cors()); 
 
@@ -11,6 +16,7 @@ var connectionOptions = { server: { socketOptions: { keepAlive: 300000, connectT
                 replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS : 30000 } } }; 
 
 mongoose.connect(db.databaseUri,{useMongoClient:true});//,socketTimeoutMS:360000, connectTimeoutMS : 30000,keepAlive: true, reconnectTries: 30});
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -24,9 +30,9 @@ var googleMapsRoute = require('./api/routes/googleMaps');
 
 var port = 3000;
 var httpServer = require('http').createServer(app);
-httpServer.listen(process.env.PORT,process.env.IP, function() {
+httpServer.listen(port,ip, function() {
 //httpServer.listen(port, function() {
-    console.log('gomunia-server running on port ' + port + '.');
+    logger.info('gomunia-server started and running on port ' + port + ' and ip ' + ip);
 });
 
 productOwnerRoute(app);
