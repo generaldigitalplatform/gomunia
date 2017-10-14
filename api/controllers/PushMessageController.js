@@ -108,21 +108,21 @@ exports.chatMessageToDevice = function(req,res){
     var sender_email_id = req.body.sender.emailid;
     var receivere_mail_id = req.body.receiver.emailid;
     var receiver_registration_id = req.body.receiver.registration_id;
-    var messageformat = req.body.message.split('&');
+    var messageformat = req.query.messageType;
 
-	if(messageformat[0] === 'notification'){
+	if(messageformat === 'notification'){
 		message = messageformat[1] + '&' + messageformat[2];
 	}
 	else{
-		if(messageformat[0] === 'text'){
+		if(messageformat === 'text'){
 			message = messageformat[1]
 		}
-		if(messageformat[0] === 'image'){
+		if(messageformat === 'image'){
 
 			var imgurl = 'https://gomunia-server.herokuapp.com/';
 			var shortname = shortid.generate();
-
-			var img = messageformat[1];
+			var imageMsg = req.body.message.split('&');
+			var img = imageMsg[1];
 			var ext = img.split(';')[0].match(/jpeg|png|gif/)[0];
 			// strip off the data: url prefix to get just the base64-encoded bytes
 			var data = img.replace(/^data:image\/\w+;base64,/, "");
