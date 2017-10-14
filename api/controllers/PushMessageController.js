@@ -2,25 +2,28 @@ var mongoose 		 = require('mongoose'),
  	admin 			 = require('firebase-admin'),
  	serviceAccount 	 = require('../config/gdsfieldforce-firebase-adminsdk-m5ezh-beffa09b38'),
 	pushMessageModel = require('../models/PushMessageModel'),
+	chatModel 		 = require('../models/ChatModel'),
 	messageModel 	 = require('../models/MessageModel'),
-    multer			 = require('multer'),
-	path 			 = require('path'),
-	logger              = require('../../utils/logger');
-	
+    // multer			 = require('multer'),
+	//path 			 = require('path'),
+	logger           = require('../../utils/logger'),
+	fs 				 = require('fs'),
+	shortid			 = require('shortid');
  
+
  	admin.initializeApp({
 	  credential: admin.credential.cert(serviceAccount),
 	  databaseURL: "https://gdsfieldforce.firebaseio.com/"
 	});
 
-	var storage = multer.diskStorage({
-	  destination: function (req, file, cb) {
-	    cb(null, './public/')
-	  },
-	  filename: function (req, file, cb) {
-	    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
-	  }
-	})
+	// var storage = multer.diskStorage({
+	//   destination: function (req, file, cb) {
+	//     cb(null, './public/')
+	//   },
+	//   filename: function (req, file, cb) {
+	//     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+	//   }
+	// })
 
 //fcm controller
 exports.saveFCMregistrationToken = function(req,res){
@@ -96,59 +99,79 @@ exports.pushMessageToDevice = function(req,res){
 	});
 }; 
 
-// router.post('/', upload.single('imageupload'),function(req, res) {
-//   res.send("File upload sucessfully.");
-// });
-
 
 exports.chatMessageToDevice = function(req,res){
 	res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     
-	var query = {"UserId":req.body.UserId}
+    var chatId = req.body.chatId;
+    var sender_email_id = req.body.sender.emailid;
+    var receivere_mail_id = req.body.receiver.emailid;
+    var receiver_registration_id = req.body.receiver.registration_id;
+    var messageformat = req.body.message.split('&');
 
-	pushMessageModel.findOne(query,function(err, response){
-	// if(err){
-	// 	return res.send(err);
-	// }
-	
-	// // This registration token comes from the client FCM SDKs.
-	// if(!response){
-	// 	return res.send("Client not registered for FCM");
-	// }
-	// var registrationToken = response.FCMregistrationToken; //"bk3RNwTe3H0:CI2k_HHwgIpoDKCIZvvDMExUdFQ3P1...";
-
-	if(req.query.messageType === '1'){
-
-		var upload = multer({
-		storage: storage,
-		fileFilter: function(req, file, callback) {
-			var ext = path.extname(file.originalname)
-			if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
-				return callback(res.end('Only images are allowed'), null)
-			}
-			callback(null, true)
-		}
-		}).single('file');
-		upload(req, res, function(err) {
-			res.send('File is uploaded');
-			logger.info(err);
-		})
-
+	if(messageformat[0] === 'notification'){
+		message = messageformat[1] + '&' + messageformat[2];
 	}
-	// var mesg= req.body.message.split(',');
-	// mess = mesg[0] + ","  + mesg[1];
-	// See the "Defining the message payload" section below for details
-	// on how to define a message payload.
+	else{
+		if(messageformat[0] === 'text'){
+			message = messageformat[1]
+		}
+		if(messageformat[0] === 'image'){
+
+			var imgurl = 'https://gomunia-server.herokuapp.com/';
+			var shortname = shortid.generate();
+
+			var img = messageformat[1];
+			var ext = img.split(';')[0].match(/jpeg|png|gif/)[0];
+			// strip off the data: url prefix to get just the base64-encoded bytes
+			var data = img.replace(/^data:image\/\w+;base64,/, "");
+			var buf = new Buffer(data, 'base64');
+			fs.writeFile(__dirname + '/../../public/images/'+shortname + "."+ ext, buf , (err) => {
+			  if (err) logger.error(err);
+			  }
+			 );
+			message = imgurl + 'public/images/' + shortname;
+			// var upload = multer({
+			// storage: storage,
+			// fileFilter: function(req, file, callback) {
+			// 	var ext = path.extname(file.originalname)
+			// 	if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
+			// 		return callback(res.end('Only images are allowed'), null)
+			// 	}
+			// 	callback(null, true)
+			// }
+			// }).single('file');
+			// upload(req, res, function(err) {
+			// 	res.send('File is uploaded');
+			// 	logger.info(err);
+			// })
+
+		}
+	}	
+	
 	var payload = {
-	  // notification: {
-	  //   title: req.body.notification.title,
-	  //   body: req.body.notification.body
-	  // },
 	  data: {
-	    message:req.body.message
+	    message:message
 	  }
 	};
+
+	msgModel = new messageModel({
+		chatId : chatId,
+		receiver:{email_id:receivere_mail_id},
+		sender:{email_id:sender_email_id},
+		message:message
+	//	time_created:new Date()		
+	})
+
+	msgModel.save(function(err,profile){
+	   if(err) {
+             logger.error(err)
+             return res.send(err);
+         }	        
+         return res.json(profile);
+		});	
+
 	// Send a message to the device corresponding to the provided
 	// registration token.
 	// admin.messaging().sendToDevice(registrationToken, payload)
@@ -157,10 +180,10 @@ exports.chatMessageToDevice = function(req,res){
 	// 		//console.log("Successfully sent message:", response);
 	// 	})
 	// 	.catch(function(error) {
-	// 		//console.log("Error sending message:", error);
+	// 		logger.error(error);
 	// 		res.json(error);
 	// 	});
-	});
+	
 }; 
 
 

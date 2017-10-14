@@ -1,27 +1,19 @@
 var mongoose = require('mongoose'),
 	Schema = mongoose.Schema;
 
-
-var ConversationSchema = new Schema({
-	conversationId:Object,
-	members:[]
-},{timestamps:true},{"strict":false})
-
 var MessageSchema = new Schema({
-	conversationId:Object,
-	sender:String,
-	receiver:String,
-	Message:{
-		type:Number,
-		text:String,
-		image:{
-			data:Buffer,
-			contentType:String
-		}
+	chatId:Object,
+	sender:{
+		email_id:String,
+		registration_id:String
 	},
-	DateTime:Date,
-	conversationId:Object	
+	receiver:{
+		email_id:String,
+		registration_id:String
+	},
+	message:String
+	//time_created:Date	
 },{timestamps:true},{"strict":false});
 
 module.exports = mongoose.model("Message",MessageSchema);
-module.exports = mongoose.model("Conversation",ConversationSchema);
+

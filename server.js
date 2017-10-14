@@ -27,6 +27,8 @@ var productOwnerRoute = require('./api/routes/productOwnerRoute');
 var jobRoute = require('./api/routes/jobRoute');
 var pushMessageRoute = require('./api/routes/PushMessageRoute');
 var googleMapsRoute = require('./api/routes/googleMaps');
+var chatRoute = require('./api/routes/chatRoute');
+
 //var port = 3000;
 var httpServer = require('http').createServer(app);
 httpServer.listen(port,ip, function() {
@@ -40,5 +42,6 @@ employeeRoute(app);
 jobRoute(app);
 pushMessageRoute(app);
 googleMapsRoute(app);
+chatRoute(app);
 
 module.exports = app;
