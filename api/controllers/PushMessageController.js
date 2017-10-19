@@ -8,13 +8,25 @@ var mongoose 		 = require('mongoose'),
 	//path 			 = require('path'),
 	logger           = require('../../utils/logger'),
 	fs 				 = require('fs'),
-	shortid			 = require('shortid');
- 
+	shortid			 = require('shortid'),
+    Storage 		 = require('@google-cloud/storage'),
+	stream 			 = require('stream'),
+	config           = require('../config/database'),
+	Promise = require('promise');
 
  	admin.initializeApp({
 	  credential: admin.credential.cert(serviceAccount),
 	  databaseURL: "https://gdsfieldforce.firebaseio.com/"
 	});
+    
+ 	var gcs = require('@google-cloud/storage')({
+			  projectId: config.google_gdsfieldforce_project_id,
+	 		  keyFilename: __dirname + '/../config/gdsfieldforce-firebase-adminsdk-m5ezh-beffa09b38.json'
+			});
+
+	//Define bucket.
+	const bucket_name = 'gdsfieldforce.appspot.com' ;
+	var myBucket = gcs.bucket(bucket_name);
 
 	// var storage = multer.diskStorage({
 	//   destination: function (req, file, cb) {
@@ -25,7 +37,78 @@ var mongoose 		 = require('mongoose'),
 	//   }
 	// })
 
-//fcm controller
+
+
+uploadImage = function(img_filename,imgdata){
+	return new Promise(function (resolve,reject){	
+		var bufferStream = new stream.PassThrough();
+		bufferStream.end(new Buffer(imgdata, 'base64'));
+		var file = myBucket.file(img_filename);
+		var fileType = img_filename.split('.')[1];
+
+		//Pipe the 'bufferStream' into a 'file.createWriteStream' method.
+		bufferStream.pipe(file.createWriteStream({
+		    metadata: {
+		      contentType: 'image/'+fileType,
+		      metadata: {
+		        custom: 'metadata'
+		      }
+		    },
+		    public: true,
+		    validation: "md5"
+		  }))
+		  .on('error', function(err) {		  	
+		  	logger.info('file + img_filename + failed to upload to google cloud storage');
+		  	reject(err);
+		  })
+		  .on('finish', function(req) {
+		   	message = config.googlecloudstorage_url + bucket_name +'/'+img_filename;		   	
+		   	logger.info('file ' + img_filename + ' uploaded to google cloud storage');
+		   	resolve(message);
+		  });
+
+	})
+}
+saveMessage = function(chatId,sender_email_id,receivere_mail_id,message){	
+	return new Promise(function(resolve, reject){	
+	    msgModel = new messageModel({
+		chatId : chatId,
+		receiver:{email_id:receivere_mail_id},
+		sender:{email_id:sender_email_id},
+		message:message
+		});
+
+		msgModel.save(function(err,profile){
+	    if(err) {
+             logger.error(err)
+             reject(err);	            
+        }else{
+         	logger.info('Message Saved to Db');
+         	resolve(profile);
+        }        
+         
+		});	
+	});
+}
+pushMessage = function(receiver_registration_id,message){
+	return new Promise(function(resolve,reject){
+		var payload = {
+		  data: {
+		    message:message
+		  }
+		};
+		admin.messaging().sendToDevice(receiver_registration_id, payload)
+		.then(function(response) {
+			logger.info('Message pushed to device');
+			resolve('Success');
+		})
+		.catch(function(error) {
+			logger.error('Failed to push message, the reason is : '+ error);
+			reject(error);
+		});
+	})	
+}
+
 exports.saveFCMregistrationToken = function(req,res){
 	res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -53,10 +136,8 @@ exports.saveFCMregistrationToken = function(req,res){
 		return res.json(profile);
 		});
 	}
-});
-
-}; 
-
+	});
+};
 exports.pushMessageToDevice = function(req,res){
 	res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -97,9 +178,7 @@ exports.pushMessageToDevice = function(req,res){
 			res.json(error);
 		});
 	});
-}; 
-
-
+};
 exports.chatMessageToDevice = function(req,res){
 	res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -109,29 +188,56 @@ exports.chatMessageToDevice = function(req,res){
     var receivere_mail_id = req.body.receiver.emailid;
     var receiver_registration_id = req.body.receiver.registration_id;
     var messageformat = req.query.messageType;
-
+    var message;
+	
 	if(messageformat === 'notification'){
-		message = messageformat[1] + '&' + messageformat[2];
+		message = req.body.message;
+		pushMessage(receiver_registration_id,message)
+			.then(([pushMessage]) =>{
+				logger.info('message pushed to device');
+				res.send('Success');
+			})
+			.catch(error =>{
+				logger.error(error);
+			})
 	}
 	else{
 		if(messageformat === 'text'){
-			message = messageformat[1]
+			message =req.body.message;
+			Promise.all([saveMessage(chatId,sender_email_id,receivere_mail_id,message),pushMessage(receiver_registration_id,message)])
+			.then(([saveMessage,pushMessage]) =>{
+				logger.info('message saved and pushed to device');
+				res.send('Success');
+
+			})
+			.catch(error =>{
+				logger.error(error);
+			})
 		}
 		if(messageformat === 'image'){
+			
+			var imgbase64 = req.body.message.split('&')[1];			
+			var imgFileExt = imgbase64.split(';')[0].match(/jpeg|png|gif/)[0];
+			var imgdata = imgbase64.replace(/^data:image\/\w+;base64,/, "");
+			var img_filename = shortid.generate() + "."+ imgFileExt;
 
-			var imgurl = 'https://gomunia-server.herokuapp.com/';
-			var shortname = shortid.generate();
-			var imageMsg = req.body.message.split('&');
-			var img = imageMsg[1];
-			var ext = img.split(';')[0].match(/jpeg|png|gif/)[0];
-			// strip off the data: url prefix to get just the base64-encoded bytes
-			var data = img.replace(/^data:image\/\w+;base64,/, "");
-			var buf = new Buffer(data, 'base64');
-			fs.writeFile(__dirname + '/../../public/images/'+shortname + "."+ ext, buf , (err) => {
-			  if (err) logger.error(err);
-			  }
-			 );
-			message = imgurl + 'public/images/' + shortname;
+			message = config.googlecloudstorage_url + bucket_name +'/'+img_filename;
+			Promise.all([uploadImage(img_filename,imgdata),saveMessage(chatId,sender_email_id,receivere_mail_id,message),pushMessage(receiver_registration_id,message)])
+			.then(([uploadImage,saveMessage,pushMessage]) =>{
+				logger.info('Image uploaded, message saved and message pushed to device');
+				res.send('Success');
+
+			})
+			.catch(error =>{
+				logger.error(error);
+			})
+			// fs.writeFile(__dirname + '/../../public/images/'+shortname + "."+ ext, buf , (err) => {
+			//   if (err) logger.error(err);
+			//   }
+			//  );
+			
+			// message = imgurl + 'public/images/' + shortname;
+
 			// var upload = multer({
 			// storage: storage,
 			// fileFilter: function(req, file, callback) {
@@ -146,31 +252,30 @@ exports.chatMessageToDevice = function(req,res){
 			// 	res.send('File is uploaded');
 			// 	logger.info(err);
 			// })
-
 		}
 	}	
 	
-	var payload = {
-	  data: {
-	    message:message
-	  }
-	};
+	// var payload = {
+	//   data: {
+	//     message:message
+	//   }
+	// };
 
-	msgModel = new messageModel({
-		chatId : chatId,
-		receiver:{email_id:receivere_mail_id},
-		sender:{email_id:sender_email_id},
-		message:message
-	//	time_created:new Date()		
-	})
+	// msgModel = new messageModel({
+	// 	chatId : chatId,
+	// 	receiver:{email_id:receivere_mail_id},
+	// 	sender:{email_id:sender_email_id},
+	// 	message:message
+	// //	time_created:new Date()		
+	// })
 
-	msgModel.save(function(err,profile){
-	   if(err) {
-             logger.error(err)
-             return res.send(err);
-         }	        
-         return res.json(profile);
-		});	
+	// msgModel.save(function(err,profile){
+	//    if(err) {
+ //             logger.error(err)
+ //             return res.send(err);
+ //         }	        
+ //         return res.json(profile);
+	// 	});	
 
 	// Send a message to the device corresponding to the provided
 	// registration token.
@@ -182,8 +287,7 @@ exports.chatMessageToDevice = function(req,res){
 	// 	.catch(function(error) {
 	// 		logger.error(error);
 	// 		res.json(error);
-	// 	});
-	
+	// 	});	
 }; 
 
 

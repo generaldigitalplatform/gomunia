@@ -5,6 +5,7 @@ module.exports = {
 	'googlemapsapikey':'AIzaSyBh-Su_ZydI-kofZ0incHVCHPECZytqEK0',
 	'projectid':'gdsfieldforce',
 	'google_fcm_notification_url':'https://android.googleapis.com/gcm/notification',
-	'google_gdsfieldforce_web_api':'AIzaSyBuwOO0RuAJZAh8Di6mffPmn9giL9HIFtA'
+	'google_gdsfieldforce_web_api':'AIzaSyBuwOO0RuAJZAh8Di6mffPmn9giL9HIFtA',
+	'googlecloudstorage_url':'https://storage.googleapis.com/'
 
 }
