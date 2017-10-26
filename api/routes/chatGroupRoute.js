@@ -7,7 +7,9 @@ var chatGroupRoute = express.Router(),
 module.exports = function(app){
 
   router.use('/',chatGroupRoute);
-  chatGroupController.post('/chatgroup',chatGroupController.createChatGroup);
+  chatGroupRoute.post('/chatgroup/create',chatGroupController.createChatGroup);
+  chatGroupRoute.post('/chatgroup/add',chatGroupController.addUsersToChatGroup);
+  chatGroupRoute.post('/chatgroup/remove',chatGroupController.removeUsersFromChatGroup);
 
   app.use('/api',router);
 }

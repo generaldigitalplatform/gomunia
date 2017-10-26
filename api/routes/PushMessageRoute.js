@@ -12,7 +12,7 @@ module.exports = function(app){
  pushMessageRoute.post('/message',pushMessageController.pushMessageToDevice);
  pushMessageRoute.post('/regtoken',pushMessageController.saveFCMregistrationToken);
  pushMessageRoute.post('/chat',pushMessageController.chatMessageToDevice);
-
+ pushMessageRoute.post('/chat/image',pushMessageController.chatImageMessageToDevice);
 
  app.use('/api',router);
 }

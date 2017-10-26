@@ -1,23 +1,39 @@
-var mongoose = require('mongoose'),
-	  ChatModel = mongoose.model('Chat'),
-    logger = require('../../utils/logger'),
-    FCMModel = mongoose.model('FCM'),
-    Promise = require('promise'),
-    shortid  = require('shortid'),
-    msgModel = require('../models/MessageModel');
-    request          = require('request'),
-    fs         = require('fs'),
-    moment  = require('moment');
+var mongoose    = require('mongoose'),
+	  ChatModel   = mongoose.model('Chat'),
+    logger      = require('../../utils/logger'),
+    FCMModel    = mongoose.model('FCM'),
+    Promise     = require('promise'),
+    shortid     = require('shortid'),
+    msgModel    = require('../models/MessageModel');
+    request     = require('request'),
+    fs          = require('fs'),
+    moment      = require('moment');
 
-findRegistrationIds = function(req){
+buildChatObject = function(req){
     return new Promise(function(resolve,reject){
+        var employee={
+              email:String,
+              firstname:String,
+              lastname:String,
+              primaryphone:Number
+           }
         var regidObj={};    
         var registrationids=[];
         var members = req.body.members;
         for(var i=0; i< Object.keys(members).length;i++){
-               FCMModel.findOne({"UserId":members[i].emailid},function (err,response) {
-               regidObj['emailid'] =response.UserId;
+           
+               employee.email = members[i].employee.email;
+               employee.firstname = members[i].employee.firstname;
+               employee.lastname = members[i].employee.lastname;
+               employee.primaryphone = members[i].employee.primaryphone;
+
+               FCMModel.findOne({"UserId":members[i].employee.email},function (err,response) {
+               
+               regidObj['employee'] =employee;               
                regidObj['registration_id'] = response.FCMregistrationToken;
+               regidObj['delivered'] = false;
+               regidObj['read'] = false;
+               regidObj['last_seen'] ="";
                registrationids.push(regidObj);    
                regidObj = {};
                if (registrationids.length === Object.keys(members).length)
@@ -29,47 +45,75 @@ findRegistrationIds = function(req){
         }        
     })
 }
+pushMessage = function(receiver_registration_id,message){
+  return new Promise(function(resolve,reject){
+    var payload = {
+      data: {
+        message:message
+      }
+    };
+    admin.messaging().sendToDevice(receiver_registration_id, payload)
+    .then(function(response) {
+      logger.info('Message pushed to device');
+      resolve('Success');
+    })
+    .catch(function(error) {
+      logger.error('Failed to push message, the reason is : '+ error);
+      reject(error);
+    });
+  })  
+}
+saveChatOnDb = function(members){
+    return new Promise(function(resolve,reject){
+      var chat = new ChatModel({          
+          members:members
+      })
+      chat.save(function(err,chatprofile){
+          if(err) {
+              reject(err)
+          }
+          else{
+              resolve(chatprofile);
+          }
+        });
+    })   
+}
 exports.createChat = function(req,res){
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
     if(req.body.chatId){
-        var query = {"chatId":req.body.chatId}
+        var query = {"_id":req.body.chatId}
         ChatModel.findOne(query,function(err,chatprofile){
             if(err){
                  logger.error(err)
                  res.send(err);
             }else{           
-            res.json(chatprofile);
+                res.json(chatprofile);
             }
         });
     }
     else{
-        findRegistrationIds(req)
+        buildChatObject(req)
         .then(function(members){
-            var chat = new ChatModel({
-            chatId:shortid.generate(),         
-            members : members 
+            //chatId:shortid.generate();       
+            //members : members;
+
+            saveChatOnDb(members)
+
+            // Promise.all([
+            //     saveChatOnDb(chatId,members),
+            //     pushMessage(receiver_registration_id,members)            
+            // ])
+            .then(function(gcmresult,dbresult){
+                //logger.info('Chat created between' + chatprofile.members[0].emailid + 'and ' + chatprofile.members[1].emailid)   
+                res.json(gcmresult);
             })
-            chat.save(function(err,chatprofile){
-                if(err) {
-                    logger.error(err)
-                    res.send(err);
-                }
-                else{
-                    logger.info('Chat created between' + chatprofile.members[0].emailid + 'and ' + chatprofile.members[1].emailid)          
-                    res.json(chatprofile);
-                }
+            .catch(function(error){
+                logger.error(error);
+                res.json({error:error});
             });
         })
-       //  var registrationids=[];
-       //  var members = req.body.members.split(',');
-       // for(var i=0; i< Object.keys(members).length;i++){
-       //         FCMModel.findOne({"UserId":members[i]},function (err,response) {
-       //         registrationids.push(response.FCMregistrationToken);              
-       //      });
-       //  }
-       
     }
 };
 exports.findMessagesByChatId = function(req,res){
@@ -141,6 +185,7 @@ exports.findMessagesByChatId = function(req,res){
           res.json(chatprofile);
         });
 };
+
 // exports.findChatImage = function(req,res){
 // request
 //   .get('https://en.wikipedia.org/wiki/Munia#/media/File:Chestnut-breasted_Mannikin444.jpg')

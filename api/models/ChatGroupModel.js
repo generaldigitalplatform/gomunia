@@ -2,9 +2,11 @@ var mongoose = require('mongoose'),
 	Schema = mongoose.Schema;
 
 var ChatGroupSchema = new Schema({
-	notification_key_name:String
+	createdBy:String,
+	chatId:String,
+	notification_key_groupname:String,
 	notification_key:String,
-	registration_ids:[]
+	notification_ids:[]
 },{timestamps:true},{"strict":false})
 
 module.exports = mongoose.model("ChatGroup",ChatGroupSchema);
