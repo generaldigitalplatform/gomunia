@@ -177,13 +177,13 @@ exports.findMessagesByChatId = function(req,res){
       query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
     }
 
-    msgModel.find(query,{},{$sort : { createdAt : -1}},function(err,chatprofile){
+    msgModel.find(query,{},function(err,chatprofile){
         if(err) {
              logger.error(err)
              return res.send(err);
          }          
           res.json(chatprofile);
-        });
+        }).sort({ createdAt : -1});
 };
 
 // exports.findChatImage = function(req,res){
