@@ -90,7 +90,7 @@ exports.findGeoLocation = function(req,res){
 	    	}
     		
     	})    	
-    	.catch(function(error){
-    		res.json(error);
-    	})
+    	// .catch(function(error){
+    	// 	res.json(error);
+    	// })
 };
