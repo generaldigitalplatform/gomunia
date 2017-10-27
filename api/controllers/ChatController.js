@@ -79,28 +79,24 @@ saveChatOnDb = function(members){
     })   
 }
 exports.createChat = function(req,res){
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+   // res.header("Access-Control-Allow-Origin", "*");
+   // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
-    if(req.body.chatId){
-        var query = {"_id":req.body.chatId}
-        ChatModel.findOne(query,function(err,chatprofile){
-            if(err){
-                 logger.error(err)
-                 res.send(err);
-            }else{           
-                res.json(chatprofile);
-            }
-        });
-    }
-    else{
+    // if(req.body.chatId){
+    //     var query = {"_id":req.body.chatId}
+    //     ChatModel.findOne(query,function(err,chatprofile){
+    //         if(err){
+    //              logger.error(err)
+    //              res.send(err);
+    //         }else{           
+    //             res.json(chatprofile);
+    //         }
+    //     });
+    // }
+    // else{
         buildChatObject(req)
         .then(function(members){
-            //chatId:shortid.generate();       
-            //members : members;
-
             saveChatOnDb(members)
-
             // Promise.all([
             //     saveChatOnDb(chatId,members),
             //     pushMessage(receiver_registration_id,members)            
@@ -114,7 +110,7 @@ exports.createChat = function(req,res){
                 res.json({error:error});
             });
         })
-    }
+    //}
 };
 exports.findMessagesByChatId = function(req,res){
     res.header("Access-Control-Allow-Origin", "*");

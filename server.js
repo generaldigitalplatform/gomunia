@@ -32,10 +32,10 @@ var googleMapsRoute = require('./api/routes/googleMaps');
 var chatRoute = require('./api/routes/chatRoute');
 var chatGroupRoute = require('./api/routes/chatGroupRoute');
 
-//var port = 3000;
+var port = 3000;
 var httpServer = require('http').createServer(app);
-httpServer.listen(port,ip, function() {
-//httpServer.listen(port, function() {
+//httpServer.listen(port,ip, function() {
+httpServer.listen(port, function() {
     logger.info('gomunia-server started and running on port ' + port + ' and ip ' + ip);
 });
 

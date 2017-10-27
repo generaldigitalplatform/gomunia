@@ -39,7 +39,8 @@
     "shortid": "^2.2.8",
     "stream": "0.0.2",
     "winston": "^2.4.0",
-    "winston-daily-rotate-file": "^1.7.2"
+    "winston-daily-rotate-file": "^1.7.2",
+    "winston-logs-display": "^0.1.1"
   },
   "devDependencies": {
     "jasmine": "^2.6.0",

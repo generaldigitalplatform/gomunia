@@ -9,9 +9,11 @@ var ChatSchema = new Schema({
 	// }]
 	members: [{ 
 		employee :  {
-                email : String,//mongoose.Schema.Types.ObjectId,
-              //  ref : 'Employee'
-            },
+				//type: Schema.Types.ObjectId,ref : 'Employee'},
+              email : String,
+              firstname:String,
+        	  lastname:String
+           },
 		registration_id:String,
         delivered : Boolean,
         read : Boolean,
