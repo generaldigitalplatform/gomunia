@@ -5,10 +5,11 @@ var express 	= require('express'),
 	cors 		= require("cors"),	
 	db 			= require('./api/config/database'),
 	path 		= require('path'),
-	logger 		= require('./utils/logger');
-	port 		= process.env.PORT;
-	ip 	 		= process.env.IP;
+	logger 		= require('./utils/logger'),
+	path 		= require('path');
 
+var	port 		= process.env.PORT;
+var	ip 	 		= process.env.IP;
 
 app.options('*', cors()); 
 
@@ -20,6 +21,7 @@ mongoose.connect(db.databaseUri,{useMongoClient:true});//,socketTimeoutMS:360000
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'logs')));
 
 var employerRoute = require('./api/routes/employerRoute');
 var employeeRoute = require('./api/routes/employeeRoute');
