@@ -7,18 +7,31 @@ var ChatSchema = new Schema({
 	// 	emailid:String,
 	// 	registration_id:String
 	// }]
-	members: [{ 
-		employee :  {
+	createdBy:{
+		email : String,
+        firstname:String,
+        lastname:String,
+        primaryphone:Number,
+        employeeid:String,
+        employerid:String
+	},
+	//members: { 
+		member :  {
 				//type: Schema.Types.ObjectId,ref : 'Employee'},
               email : String,
               firstname:String,
-        	  lastname:String
-           },
-		registration_id:String,
-        delivered : Boolean,
-        read : Boolean,
-        last_seen : Date
-    }]
+        	  lastname:String,
+        	  primaryphone:Number,
+        	  employerid:String,
+        	    employeeid:String,
+        	  	registration_id:String,
+		        delivered : Boolean,
+		        read : Boolean,
+		        last_seen : Date
+
+           }
+	
+   // }
 	// members : [
  //        {
  //            user :  {

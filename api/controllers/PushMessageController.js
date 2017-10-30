@@ -105,16 +105,18 @@ uploadImage = function(img_filename,imgdata){
 
 	})
 }
-saveMessageOnDb = function(chatId,author_email,author_firstname,message){	
+saveMessageOnDb = function(chatId,author_email,author_firstname,author_lastname,author_employerid,message){	
 	return new Promise(function(resolve, reject){	
 	    msgModel = new messageModel({
 		chatId : chatId,
 		//receiver:{email_id:receivere_mail_id},
 		author:{
 			firstname:author_firstname,
-			email:author_email},
-			message : message
-		
+			lastname:author_lastname,
+			email:author_email,
+			employerid:author_employerid
+		},
+			message : message		
 		});
 
 		msgModel.save(function(err,profile){
@@ -130,22 +132,22 @@ saveMessageOnDb = function(chatId,author_email,author_firstname,message){
 	});
 }
 pushMessages = function(receiver_registration_id,message){
-	return new Promise(function(resolve,reject){
-		var payload = {
-		  data: {
-		    message:message
-		  }
-		};
-		admin.messaging().sendToDevice(receiver_registration_id, payload)
-		.then(function(response) {
-			logger.info('Message pushed to device');
-			resolve('Success');
-		})
-		.catch(function(error) {
-			logger.error('Failed to push message, the reason is : '+ error);
-			reject(error);
-		});
-	})	
+	// return new Promise(function(resolve,reject){
+	// 	var payload = {
+	// 	  data: {
+	// 	    message:message
+	// 	  }
+	// 	};
+	// 	admin.messaging().sendToDevice(receiver_registration_id, payload)
+	// 	.then(function(response) {
+	// 		logger.info('Message pushed to device');
+	// 		resolve('Success');
+	// 	})
+	// 	.catch(function(error) {
+	// 		logger.error('Failed to push message, the reason is : '+ error);
+	// 		reject(error);
+	// 	});
+	// })	
 }
 
 exports.saveFCMregistrationToken = function(req,res){
@@ -225,6 +227,8 @@ exports.chatMessageToDevice = function(req,res){
     var chatId = req.body.chatId;
     var author_email = req.body.author.email;
     var author_firstname = req.body.author.firstname;
+    var author_lastname = req.body.author.lastname;
+    var author_employerid = req.body.author.employerid;
     var message = req.body.message;
 
     //var receivere_mail_id = req.body.receiver.emailid;
@@ -245,7 +249,7 @@ exports.chatMessageToDevice = function(req,res){
 	}
 	else{
 		if(messageformat === 'text'){
-			Promise.all([saveMessageOnDb(chatId,author_email,author_firstname,message),pushMessages(receiver_registration_id,message)])
+			Promise.all([saveMessageOnDb(chatId,author_email,author_firstname,author_lastname,author_employerid,message),pushMessages(receiver_registration_id,message)])
 			.then(([saveMessage,pushMessage]) =>{
 				logger.info('message saved and pushed to device');
 				res.send('Success');

@@ -12,7 +12,8 @@ var MessageSchema = new Schema({
         //ref : 'Employee'
         email:String,
         firstname:String,
-        lastname:String
+        lastname:String,
+        employerid:String
        // primaryphone:Number
 
 	 //	registration_id:String

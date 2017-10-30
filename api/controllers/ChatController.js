@@ -11,38 +11,64 @@ var mongoose    = require('mongoose'),
 
 buildChatObject = function(req){
     return new Promise(function(resolve,reject){
-        var employee={
+        var createdBy={
+              email:String,
+              firstname:String,
+              lastname:String,
+              primaryphone:Number,
+              employerid:String,
+              employeeid:String
+           }
+        var member={
               email:String,
               firstname:String,
               lastname:String,
               primaryphone:Number
            }
         var regidObj={};    
-        var registrationids=[];
-        var members = req.body.members;
-        for(var i=0; i< Object.keys(members).length;i++){
-           
-               employee.email = members[i].employee.email;
-               employee.firstname = members[i].employee.firstname;
-               employee.lastname = members[i].employee.lastname;
-               employee.primaryphone = members[i].employee.primaryphone;
+        //var registrationids=[];
+       // var members = req.body.member;
+        createdBy.email = req.body.createdBy.email;
+        createdBy.firstname = req.body.createdBy.firstname;
+        createdBy.lastname = req.body.createdBy.lastname;
+        createdBy.primaryphone = req.body.createdBy.primaryphone;
+        createdBy.employerid = req.body.createdBy.employerid;
+        createdBy.employeeid = req.body.createdBy.employeeid;
 
-               FCMModel.findOne({"UserId":members[i].employee.email},function (err,response) {
+      //  for(var i=0; i< Object.keys(members).length;i++){
+           
+               member.email = req.body.member.email;
+               member.firstname = req.body.member.firstname;
+               member.lastname = req.body.member.lastname;
+               member.primaryphone = req.body.member.primaryphone;
+               member.employerid = req.body.member.employerid;
+               member.employeeid = req.body.member.employeeid;
                
-               regidObj['employee'] =employee;               
-               regidObj['registration_id'] = response.FCMregistrationToken;
-               regidObj['delivered'] = false;
-               regidObj['read'] = false;
-               regidObj['last_seen'] ="";
-               registrationids.push(regidObj);    
-               regidObj = {};
-               if (registrationids.length === Object.keys(members).length)
-               {
-                    resolve(registrationids);  
-               }                        
+               member.delivered = req.body.member.delivered;
+               member.read = req.body.member.read;
+               member.last_seen = req.body.member.last_seen;
+
+               FCMModel.findOne({"UserId":member.email},function (err,response) {
+               
+               member.registration_id = response.FCMregistrationToken;
+
+               regidObj['createdBy'] = createdBy;
+               regidObj['member'] = member;
+               resolve(regidObj);  
+               // regidObj['employee'] =employee;               
+               // regidObj['registration_id'] = response.FCMregistrationToken;
+               // regidObj['delivered'] = false;
+               // regidObj['read'] = false;
+               // regidObj['last_seen'] ="";
+               // registrationids.push(regidObj);    
+               // regidObj = {};
+               // if (registrationids.length === Object.keys(members).length)
+               // {
+               //      resolve(registrationids);  
+               // }                        
 
             });            
-        }        
+      //  }        
     })
 }
 pushMessage = function(receiver_registration_id,message){
@@ -63,11 +89,9 @@ pushMessage = function(receiver_registration_id,message){
     });
   })  
 }
-saveChatOnDb = function(members){
+saveChatOnDb = function(chatObject){
     return new Promise(function(resolve,reject){
-      var chat = new ChatModel({          
-          members:members
-      })
+      var chat = new ChatModel(chatObject);
       chat.save(function(err,chatprofile){
           if(err) {
               reject(err)
@@ -101,7 +125,7 @@ exports.createChat = function(req,res){
             //     saveChatOnDb(chatId,members),
             //     pushMessage(receiver_registration_id,members)            
             // ])
-            .then(function(gcmresult,dbresult){
+            .then(function(gcmresult){
                 //logger.info('Chat created between' + chatprofile.members[0].emailid + 'and ' + chatprofile.members[1].emailid)   
                 res.json(gcmresult);
             })
@@ -111,6 +135,48 @@ exports.createChat = function(req,res){
             });
         })
     //}
+};
+exports.findChatMembers = function(req,res){
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+    var regidObj={};
+    var registrationids=[];
+    
+    var query = {"createdBy.employeeid": req.params.Id } ;
+
+    //var query = {"employee.employerid":req.params.Id}
+  
+    ChatModel.find(query,{},function(err,chatprofile){
+    if(err) {
+           logger.error(err)
+           return res.send(err);
+       }
+       for(var i=0; i< Object.keys(chatprofile).length;i++){    
+
+         var findChatQuery = {"chatId": chatprofile[i]._id } ;
+          regidObj['chatId'] = chatprofile[i]._id;
+          regidObj['firstname'] = chatprofile[i].member.firstname;
+          regidObj['lastname'] = chatprofile[i].member.lastname;
+          regidObj['primaryphone'] = chatprofile[i].member.primaryphone;
+          regidObj['email'] = chatprofile[i].member.email;
+          regidObj['employerid'] = chatprofile[i].member.employerid;
+          regidObj['employeeid'] = chatprofile[i].member.employeeid;
+          regidObj['delivered'] = chatprofile[i].member.delivered;
+          regidObj['read'] = chatprofile[i].member.read;
+          regidObj['last_seen'] = chatprofile[i].member.last_seen;
+          regidObj['registration_id'] = chatprofile[i].member.registration_id;
+
+          msgModel.find(findChatQuery,{},function(err,chat){
+
+
+          });
+
+          registrationids.push(regidObj);
+          regidObj = {};         
+      }
+       res.json(registrationids);
+    });
 };
 exports.findMessagesByChatId = function(req,res){
     res.header("Access-Control-Allow-Origin", "*");
