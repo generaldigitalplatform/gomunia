@@ -35,7 +35,7 @@ var logger = new winston.Logger({
     exitOnError: false
 });
 
-require('winston-logs-display')(app, logger);
+//require('winston-logs-display')(app, logger);
 module.exports = logger;
 module.exports.stream = {
     write: function(message, encoding){
