@@ -1,3 +1,5 @@
+// 'use strict';
+
 var mongoose 		 = require('mongoose'),
  	admin 			 = require('firebase-admin'),
  	serviceAccount 	 = require('../config/gdsfieldforce-firebase-adminsdk-m5ezh-beffa09b38'),
@@ -12,11 +14,12 @@ var mongoose 		 = require('mongoose'),
     Storage 		 = require('@google-cloud/storage'),
 	stream 			 = require('stream'),
 	config           = require('../config/database'),
-	Promise 		 = require('promise');
+	Promise 		 = require('promise'),
  	gcs 			 = require('@google-cloud/storage')({
 						  projectId: config.google_gdsfieldforce_project_id,
 				 		  keyFilename: __dirname + '/../config/gdsfieldforce-firebase-adminsdk-m5ezh-beffa09b38.json'
-						});
+						}),
+ 	mongoose = require('mongoose');
 
  	admin.initializeApp({
 	  credential: admin.credential.cert(serviceAccount),
@@ -63,7 +66,6 @@ buildNewChatObject = function(req){
         }        
     })
 }
-
 uploadImageOnServer = function(img_filename,imgdata){
 	return new Promise(function (resolve,reject){	
 		fs.writeFile(__dirname + '/../../public/images/'+img_filename, buf , (err) => {
@@ -93,36 +95,28 @@ uploadImage = function(img_filename,imgdata){
 		    public: true,
 		    validation: "md5"
 		  }))
-		  .on('error', function(err) {		  	
-		  	logger.info('file + img_filename + failed to upload to google cloud storage');
+		  .on('error', function(err) {
 		  	reject(err);
 		  })
 		  .on('finish', function(req) {
-		   	message = config.googlecloudstorage_url + bucket_name +'/'+img_filename;		   	
-		   	logger.info('file ' + img_filename + ' uploaded to google cloud storage');
+		   	message = config.googlecloudstorage_url + bucket_name +'/'+img_filename;  
 		   	resolve(message);
 		  });
 
 	})
 }
-saveMessageOnDb = function(chatId,author_email,author_firstname,author_lastname,author_employerid,message){	
+saveMessageOnDb = function(chatId,author,messagePayload){	
 	return new Promise(function(resolve, reject){	
 	    msgModel = new messageModel({
-		chatId : chatId,
-		author:{
-				firstname:author_firstname,
-				lastname:author_lastname,
-				email:author_email,
-				employerid:author_employerid
-			},
-				message : message		
+			chatId : chatId,
+			author:author,
+			messagePayload : messagePayload		
 		});
 		msgModel.save(function(err,profile){
 	    if(err) {
              logger.error(err)
              reject(err);	            
-        }else{
-         	logger.info('Message Saved on Db');
+        }else{         	
          	resolve(profile);
         }        
          
@@ -137,12 +131,10 @@ pushMessages = function(receiver_registration_id,message){
 		  }
 		};
 		admin.messaging().sendToDevice(receiver_registration_id, payload)
-		.then(function(response) {
-			logger.info('Message pushed to device');
-			resolve('Success');
+		.then(function(response) {			
+			resolve(response);
 		})
-		.catch(function(error) {
-			logger.error('Failed to push message, the reason is : '+ error);
+		.catch(function(error) {			
 			reject(error);
 		});
 	})	
@@ -223,20 +215,40 @@ exports.chatMessageToDevice = function(req,res){
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     
     var chatId = req.body.chatId;
-    var author_email = req.body.author.email;
-    var author_firstname = req.body.author.firstname;
-    var author_lastname = req.body.author.lastname;
-    var author_employerid = req.body.author.employerid;
-    var message = req.body.message;
+    // var author_email = req.body.author.email;
+    // var author_firstname = req.body.author.firstname;
+    // var author_lastname = req.body.author.lastname;
+    // var author_employerid = req.body.author.employerid;
+    
+    var author = {
+    	email : req.body.author.email,
+    	firstname : req.body.author.firstname,
+    	lastname : req.body.author.lastname,
+    	primaryphone:req.body.author.primaryphone,
+    	employerid : req.body.author.employerid
+    }
+    var messagePayload = {
+    	messageType : req.body.messagePayload.messageType,
+    	message : req.body.messagePayload.message,
+    	receiver : {
+    		email:req.body.messagePayload.receiver.email,
+    		firstname:req.body.messagePayload.receiver.firstname,
+    		lastname:req.body.messagePayload.receiver.lastname,
+    		read:req.body.messagePayload.receiver.read,
+    		delivered:req.body.messagePayload.receiver.delivered,
+    		last_seen:req.body.messagePayload.receiver.last_seen,
+    		registration_id : req.body.messagePayload.receiver.registration_id
+    	} 
+    }
 
     //var receivere_mail_id = req.body.receiver.emailid;
-    var receiver_registration_id = req.body.receiver.registration_id;
+   // var receiver_registration_id = req.body.messagePayload.receiver.registration_id;
 
     var messageformat = req.query.messageType;
 	
 	if(messageformat === 'notification'){
 		message = req.body.message;
-		pushMessage(receiver_registration_id,message)
+		pushMessage(messagePayload.receiver.registration_id,message)
 			.then(([pushMessage]) =>{
 				logger.info('message pushed to device');
 				res.send('Success');
@@ -247,32 +259,53 @@ exports.chatMessageToDevice = function(req,res){
 	}
 	else{
 		if(messageformat === 'text'){
-			Promise.all([saveMessageOnDb(chatId,author_email,author_firstname,author_lastname,author_employerid,message),pushMessages(receiver_registration_id,message)])
+			Promise.all([saveMessageOnDb(chatId,author,messagePayload),pushMessages(messagePayload.receiver.registration_id,messagePayload.message)])
 			.then(([saveMessage,pushMessage]) =>{
 				logger.info('text message saved on db and pushed to device');
-				res.send('Success');
-
+				res.status(200).send(saveMessage).end();
 			})
 			.catch(error =>{
 				logger.error(error);
 			})
 		}
 		if(messageformat === 'image'){			
-			var imgbase64 = req.body.message.split('&')[1];			
+			var imgbase64 = messagePayload.message;//.split('&')[1];			
 			var imgFileExt = imgbase64.split(';')[0].match(/jpeg|png|gif/)[0];
 			var imgdata = imgbase64.replace(/^data:image\/\w+;base64,/, "");
-			var img_filename = shortid.generate() + "."+ imgFileExt;
+			var img_filename = mongoose.Types.ObjectId() + "."+ imgFileExt; //shortid.generate() + "."+ imgFileExt;
 
-			message = config.googlecloudstorage_url + bucket_name +'/'+img_filename;
-			Promise.all([uploadImage(img_filename,imgdata),saveMessage(chatId,sender_email_id,receivere_mail_id,message),pushMessage(receiver_registration_id,message)])
-			.then(([uploadImage,saveMessage,pushMessage]) =>{
-				logger.info('Image uploaded to server, message saved on db and pushed to device');
-				res.send('Success');
-
-			})
-			.catch(error =>{
-				logger.error(error);
-			})
+			messagePayload.message = config.googlecloudstorage_url + bucket_name +'/'+img_filename;
+			 Promise.all([uploadImage(img_filename,imgdata),
+							// .then(function(message){
+							// 	pushMessages(receiver_registration_id,message)
+							// 	.then(function(saveMessage){
+							// 		logger.info('Image uploaded to server and image url as message pushed to device');
+							// 		res.status(200).send(saveMessage).end();
+							// 	})
+							// })
+							// .catch(function(error){
+							// 	logger.error(error);
+							// }),
+							saveMessageOnDb(chatId,author,messagePayload)				
+							// .then(function(profile){
+							// 	logger.info('image url as message saved on db');
+							// 	res.status(200).send(profile).end();
+							// })
+							// .catch(function(error){
+							// 	logger.error(error);
+							 // })])
+							 ])
+			 .then(function(message){
+               	pushMessages(messagePayload.receiver.registration_id,message[0])
+					.then(function(saveMessage){
+						logger.info('Image uploaded to server, saved on db and image url as message pushed to device');
+						res.status(200).send(message[1]).end();
+					})
+            })
+            .catch(function(error){
+                logger.error(error);
+                res.json({error:error});
+            });
 			// fs.writeFile(__dirname + '/../../public/images/'+shortname + "."+ ext, buf , (err) => {
 			//   if (err) logger.error(err);
 			//   }

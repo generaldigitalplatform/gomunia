@@ -13,15 +13,25 @@ var MessageSchema = new Schema({
         email:String,
         firstname:String,
         lastname:String,
-        employerid:String
-       // primaryphone:Number
+        employerid:String,
+        primaryphone:Number
 
 	 //	registration_id:String
     },
-    message: {
-	    type: String,
-	    required: true
-  	}
+    messagePayload: {
+	    messageType : String,
+	    message:String,
+	    receiver:{
+	    	email:String,
+	    	firstname:String,
+	    	lastname:String,
+	    	registration_id:String,
+	    	read:Boolean,
+	    	delivered : Boolean,
+	    	last_seen:Date
+	    }
+	},
+  	
  },{timestamps:true},{"strict":false});
 
 module.exports = mongoose.model("Message",MessageSchema);

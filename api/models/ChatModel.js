@@ -16,20 +16,20 @@ var ChatSchema = new Schema({
         employerid:String
 	},
 	//members: { 
-		member :  {
+		member :  [{
 				//type: Schema.Types.ObjectId,ref : 'Employee'},
               email : String,
               firstname:String,
         	  lastname:String,
         	  primaryphone:Number,
         	  employerid:String,
-        	    employeeid:String,
-        	  	registration_id:String,
+	    	    employeeid:String,
+	    	  	registration_id:String,
 		        delivered : Boolean,
 		        read : Boolean,
 		        last_seen : Date
 
-           }
+           }]
 	
    // }
 	// members : [
