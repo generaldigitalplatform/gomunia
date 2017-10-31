@@ -109,22 +109,20 @@ saveMessageOnDb = function(chatId,author_email,author_firstname,author_lastname,
 	return new Promise(function(resolve, reject){	
 	    msgModel = new messageModel({
 		chatId : chatId,
-		//receiver:{email_id:receivere_mail_id},
 		author:{
-			firstname:author_firstname,
-			lastname:author_lastname,
-			email:author_email,
-			employerid:author_employerid
-		},
-			message : message		
+				firstname:author_firstname,
+				lastname:author_lastname,
+				email:author_email,
+				employerid:author_employerid
+			},
+				message : message		
 		});
-
 		msgModel.save(function(err,profile){
 	    if(err) {
              logger.error(err)
              reject(err);	            
         }else{
-         	logger.info('Message Saved to Db');
+         	logger.info('Message Saved on Db');
          	resolve(profile);
         }        
          
@@ -132,22 +130,22 @@ saveMessageOnDb = function(chatId,author_email,author_firstname,author_lastname,
 	});
 }
 pushMessages = function(receiver_registration_id,message){
-	// return new Promise(function(resolve,reject){
-	// 	var payload = {
-	// 	  data: {
-	// 	    message:message
-	// 	  }
-	// 	};
-	// 	admin.messaging().sendToDevice(receiver_registration_id, payload)
-	// 	.then(function(response) {
-	// 		logger.info('Message pushed to device');
-	// 		resolve('Success');
-	// 	})
-	// 	.catch(function(error) {
-	// 		logger.error('Failed to push message, the reason is : '+ error);
-	// 		reject(error);
-	// 	});
-	// })	
+	return new Promise(function(resolve,reject){
+		var payload = {
+		  data: {
+		    message:message
+		  }
+		};
+		admin.messaging().sendToDevice(receiver_registration_id, payload)
+		.then(function(response) {
+			logger.info('Message pushed to device');
+			resolve('Success');
+		})
+		.catch(function(error) {
+			logger.error('Failed to push message, the reason is : '+ error);
+			reject(error);
+		});
+	})	
 }
 
 exports.saveFCMregistrationToken = function(req,res){
@@ -251,7 +249,7 @@ exports.chatMessageToDevice = function(req,res){
 		if(messageformat === 'text'){
 			Promise.all([saveMessageOnDb(chatId,author_email,author_firstname,author_lastname,author_employerid,message),pushMessages(receiver_registration_id,message)])
 			.then(([saveMessage,pushMessage]) =>{
-				logger.info('message saved and pushed to device');
+				logger.info('text message saved on db and pushed to device');
 				res.send('Success');
 
 			})
@@ -268,7 +266,7 @@ exports.chatMessageToDevice = function(req,res){
 			message = config.googlecloudstorage_url + bucket_name +'/'+img_filename;
 			Promise.all([uploadImage(img_filename,imgdata),saveMessage(chatId,sender_email_id,receivere_mail_id,message),pushMessage(receiver_registration_id,message)])
 			.then(([uploadImage,saveMessage,pushMessage]) =>{
-				logger.info('Image uploaded, message saved and message pushed to device');
+				logger.info('Image uploaded to server, message saved on db and pushed to device');
 				res.send('Success');
 
 			})
