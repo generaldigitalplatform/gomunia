@@ -901,3 +901,10 @@
 {"level":"info","message":"gomunia-server started and running on port 3000 and ip undefined","timestamp":"10:38:14 PM"}
 {"level":"info","message":"gomunia-server started and running on port 3000 and ip undefined","timestamp":"10:15:33 AM"}
 {"level":"info","message":"gomunia-server started and running on port 3000 and ip undefined","timestamp":"5:26:44 PM"}
+{"level":"info","message":"gomunia-server started and running on port 3000 and ip undefined","timestamp":"7:23:49 PM"}
+{"level":"info","message":"Message Saved on Db","timestamp":"7:24:36 PM"}
+{"level":"info","message":"Message pushed to device","timestamp":"7:24:37 PM"}
+{"level":"info","message":"text message saved on db and pushed to device","timestamp":"7:24:37 PM"}
+{"level":"info","message":"Message Saved on Db","timestamp":"7:34:03 PM"}
+{"level":"info","message":"Message pushed to device","timestamp":"7:34:03 PM"}
+{"level":"info","message":"text message saved on db and pushed to device","timestamp":"7:34:03 PM"}
