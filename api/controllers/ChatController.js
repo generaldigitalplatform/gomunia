@@ -9,67 +9,40 @@ var mongoose    = require('mongoose'),
     fs          = require('fs'),
     moment      = require('moment');
 
-buildChatObject = function(req){
-    return new Promise(function(resolve,reject){
-        var createdBy={
-              email:String,
-              firstname:String,
-              lastname:String,
-              primaryphone:Number,
-              employerid:String,
-              employeeid:String
-           }
-        var member={
-              email:String,
-              firstname:String,
-              lastname:String,
-              primaryphone:Number
-           }
-        var regidObj={};    
-        //var registrationids=[];
-       // var members = req.body.member;
-        createdBy.email = req.body.createdBy.email;
-        createdBy.firstname = req.body.createdBy.firstname;
-        createdBy.lastname = req.body.createdBy.lastname;
-        createdBy.primaryphone = req.body.createdBy.primaryphone;
-        createdBy.employerid = req.body.createdBy.employerid;
-        createdBy.employeeid = req.body.createdBy.employeeid;
-
-      //  for(var i=0; i< Object.keys(members).length;i++){
-           
-               member.email = req.body.member.email;
-               member.firstname = req.body.member.firstname;
-               member.lastname = req.body.member.lastname;
-               member.primaryphone = req.body.member.primaryphone;
-               member.employerid = req.body.member.employerid;
-               member.employeeid = req.body.member.employeeid;
-               
-               member.delivered = req.body.member.delivered;
-               member.read = req.body.member.read;
-               member.last_seen = req.body.member.last_seen;
-
-               FCMModel.findOne({"UserId":member.email},function (err,response) {
-               
-               member.registration_id = response.FCMregistrationToken;
-
-               regidObj['createdBy'] = createdBy;
-               regidObj['member'] = member;
-               resolve(regidObj);  
-               // regidObj['employee'] =employee;               
-               // regidObj['registration_id'] = response.FCMregistrationToken;
-               // regidObj['delivered'] = false;
-               // regidObj['read'] = false;
-               // regidObj['last_seen'] ="";
-               // registrationids.push(regidObj);    
-               // regidObj = {};
-               // if (registrationids.length === Object.keys(members).length)
-               // {
-               //      resolve(registrationids);  
-               // }                        
-
-            });            
-      //  }        
-    })
+buildChatObject = function(createdBy,member){
+  return new Promise(function(resolve,reject){
+    var regidObj = {};
+    var createdByObj = {
+      email : createdBy.email,
+      firstname : createdBy.firstname,
+      lastname : createdBy.lastname,
+      primaryphone : createdBy.primaryphone,
+      employerid : createdBy.employerid,
+      employeeid : createdBy.employeeid,
+    };   
+    var memberObj = {
+      email: member.email,
+      firstname: member.firstname,
+      lastname: member.lastname,
+      primaryphone: member.primaryphone,
+      employerid: member.employerid,
+      employeeid: member.employeeid,
+    };
+    FCMModel.findOne({"UserId":memberObj.email},function (error,response){ 
+      if(error){
+        reject(errror)    
+      }              
+      else if(response){
+        memberObj.registration_id = response.FCMregistrationToken;
+        regidObj['createdBy'] = createdByObj;
+        regidObj['member'] = memberObj;
+        resolve(regidObj);
+      }
+      else{
+        reject(response)    
+      }      
+    });     
+  })
 }
 pushMessage = function(receiver_registration_id,message){
   return new Promise(function(resolve,reject){
@@ -103,9 +76,8 @@ saveChatOnDb = function(chatObject){
     })   
 }
 exports.createChat = function(req,res){
-   // res.header("Access-Control-Allow-Origin", "*");
-   // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-
+  var createdBy = req.body.createdBy;
+  var member =  req.body.member;
     // if(req.body.chatId){
     //     var query = {"_id":req.body.chatId}
     //     ChatModel.findOne(query,function(err,chatprofile){
@@ -118,22 +90,22 @@ exports.createChat = function(req,res){
     //     });
     // }
     // else{
-        buildChatObject(req)
-        .then(function(members){
-            saveChatOnDb(members)
-            // Promise.all([
-            //     saveChatOnDb(chatId,members),
-            //     pushMessage(receiver_registration_id,members)            
-            // ])
-            .then(function(gcmresult){
-                //logger.info('Chat created between' + chatprofile.members[0].emailid + 'and ' + chatprofile.members[1].emailid)   
-                res.json(gcmresult);
-            })
-            .catch(function(error){
-                logger.error(error);
-                res.json({error:error});
-            });
-        })
+  buildChatObject(createdBy,member)
+  .then(function(members){
+      saveChatOnDb(members)
+      // Promise.all([
+      //     saveChatOnDb(chatId,members),
+      //     pushMessage(receiver_registration_id,members)            
+      // ])
+      .then(function(chatprofile){
+        logger.info('chat created');
+        res.status(200).send(chatprofile).end();
+      })
+      .catch(function(error){
+          logger.error(error);
+          res.send({error:error}).end();
+      });
+  })
     //}
 };
 exports.findChatMembers = function(req,res){
