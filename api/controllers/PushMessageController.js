@@ -1,6 +1,7 @@
 // 'use strict';
 
 var mongoose 		 = require('mongoose'),
+	mongoose = require('mongoose'),
  	admin 			 = require('firebase-admin'),
  	serviceAccount 	 = require('../config/gdsfieldforce-firebase-adminsdk-m5ezh-beffa09b38'),
 	pushMessageModel = require('../models/PushMessageModel'),
@@ -10,27 +11,26 @@ var mongoose 		 = require('mongoose'),
 	//path 			 = require('path'),
 	logger           = require('../../utils/logger'),
 	fs 				 = require('fs'),
-	shortid			 = require('shortid'),
     Storage 		 = require('@google-cloud/storage'),
 	stream 			 = require('stream'),
 	config           = require('../config/database'),
-	Promise 		 = require('promise'),
- 	gcs 			 = require('@google-cloud/storage')({
+	Promise 		 = require('promise'), 	
+    logger      	 = require('../../utils/logger'),
+    FCMModel   	 	 = mongoose.model('FCM'),
+    request     	 = require('request'),
+    moment      	 = require('moment'),
+    gcs 			 = require('@google-cloud/storage')({
 						  projectId: config.google_gdsfieldforce_project_id,
 				 		  keyFilename: __dirname + '/../config/gdsfieldforce-firebase-adminsdk-m5ezh-beffa09b38.json'
-						}),
- 	mongoose = require('mongoose');
+						});
 
- 	admin.initializeApp({
+admin.initializeApp({
 	  credential: admin.credential.cert(serviceAccount),
 	  databaseURL: "https://gdsfieldforce.firebaseio.com/"
-	});
-    
-
-
+	});   
 	//Define bucket.
-	const bucket_name = 'gdsfieldforce.appspot.com' ;
-	var myBucket = gcs.bucket(bucket_name);
+const bucket_name = 'gdsfieldforce.appspot.com' ;
+var myBucket = gcs.bucket(bucket_name);
 
 	// var storage = multer.diskStorage({
 	//   destination: function (req, file, cb) {
@@ -41,32 +41,7 @@ var mongoose 		 = require('mongoose'),
 	//   }
 	// })
 
-
-buildNewChatObject = function(req){
-    return new Promise(function(resolve,reject){
-        var regidObj={};    
-        var registrationids=[];
-
-        var members = req.body.members;
-        for(var i=0; i< Object.keys(members).length;i++){
-               FCMModel.findOne({"UserId":members[i].emailid},function (err,response) {
-               regidObj['email_id'] =response.UserId;
-               regidObj['registration_id'] = response.FCMregistrationToken;
-               regidObj['delivered'] = false;
-               regidObj['read'] = false;
-               regidObj['last_seen'] ="";
-               registrationids.push(regidObj);    
-               regidObj = {};
-               if (registrationids.length === Object.keys(members).length)
-               {
-                    resolve(registrationids);  
-               }                        
-
-            });            
-        }        
-    })
-}
-uploadImageOnServer = function(img_filename,imgdata){
+uploadImageOnLocalServer = function(img_filename,imgdata){
 	return new Promise(function (resolve,reject){	
 		fs.writeFile(__dirname + '/../../public/images/'+img_filename, buf , (err) => {
 	  	if (err){
@@ -77,7 +52,7 @@ uploadImageOnServer = function(img_filename,imgdata){
 		 
 	})
 }
-uploadImage = function(img_filename,imgdata){
+uploadImageOnGoogleStorage = function(img_filename,imgdata){
 	return new Promise(function (resolve,reject){	
 		var bufferStream = new stream.PassThrough();
 		bufferStream.end(new Buffer(imgdata, 'base64'));
@@ -105,6 +80,70 @@ uploadImage = function(img_filename,imgdata){
 
 	})
 }
+pushMessage = function(receiver_registration_id,message){
+	return new Promise(function(resolve,reject){
+		var payload = {
+		  data: {
+		    message:message
+		  }
+		};
+		admin.messaging().sendToDevice(receiver_registration_id, payload)
+		.then(function(response) {			
+			resolve(response);
+		})
+		.catch(function(error) {			
+			reject(error);
+		});
+	})	
+}
+buildChatObject = function(createdBy,member){
+  return new Promise(function(resolve,reject){
+    var regidObj = {};
+    var createdByObj = {
+      email : createdBy.email,
+      firstname : createdBy.firstname,
+      lastname : createdBy.lastname,
+      primaryphone : createdBy.primaryphone,
+      employerid : createdBy.employerid,
+      employeeid : createdBy.employeeid,
+    };   
+    var memberObj = {
+      email: member.email,
+      firstname: member.firstname,
+      lastname: member.lastname,
+      primaryphone: member.primaryphone,
+      employerid: member.employerid,
+      employeeid: member.employeeid,
+    };
+    FCMModel.findOne({"UserId":memberObj.email},function (error,response){ 
+      if(error){
+        reject(errror)    
+      }              
+      else if(response){
+        memberObj.registration_id = response.FCMregistrationToken;
+        regidObj['createdBy'] = createdByObj;
+        regidObj['member'] = memberObj;
+        resolve(regidObj);
+      }
+      else{
+        reject(response)    
+      }      
+    });     
+  })
+}
+saveChatOnDb = function(chatObject){
+    return new Promise(function(resolve,reject){
+      var chat = new chatModel(chatObject);
+      chat.save(function(err,chatprofile){
+          if(err) {
+              reject(err)
+          }
+          else{
+              resolve(chatprofile);
+          }
+        });
+    })   
+}
 saveMessageOnDb = function(chatId,author,messagePayload){	
 	return new Promise(function(resolve, reject){	
 	    msgModel = new messageModel({
@@ -123,23 +162,150 @@ saveMessageOnDb = function(chatId,author,messagePayload){
 		});	
 	});
 }
-pushMessages = function(receiver_registration_id,message){
-	return new Promise(function(resolve,reject){
-		var payload = {
-		  data: {
-		    message:message
-		  }
-		};
-		admin.messaging().sendToDevice(receiver_registration_id, payload)
-		.then(function(response) {			
-			resolve(response);
-		})
-		.catch(function(error) {			
-			reject(error);
-		});
-	})	
-}
+exports.createChat = function(req,res){
+  var createdBy = req.body.createdBy;
+  var member =  req.body.member;
+    // if(req.body.chatId){
+    //     var query = {"_id":req.body.chatId}
+    //     ChatModel.findOne(query,function(err,chatprofile){
+    //         if(err){
+    //              logger.error(err)
+    //              res.send(err);
+    //         }else{           
+    //             res.json(chatprofile);
+    //         }
+    //     });
+    // }
+    // else{
+  buildChatObject(createdBy,member)
+  .then(function(members){
+      saveChatOnDb(members)
+      // Promise.all([
+      //     saveChatOnDb(chatId,members),
+      //     pushMessage(receiver_registration_id,members)            
+      // ])
+      .then(function(chatprofile){
+        logger.info('chat created');
+        res.status(200).send(chatprofile).end();
+      })
+      .catch(function(error){
+          logger.error(error);
+          res.send({error:error}).end();
+      });
+  })
+    //}
+};
+exports.findChatMembers = function(req,res){
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
+    var regidObj={};
+    var registrationids=[];
+    
+    var query = {"createdBy.employeeid": req.params.Id } ;
+
+    //var query = {"employee.employerid":req.params.Id}
+  
+    chatModel.find(query,{},function(err,chatprofile){
+    if(err) {
+           logger.error(err)
+           return res.send(err);
+       }
+       for(var i=0; i< Object.keys(chatprofile).length;i++){    
+
+         var findChatQuery = {"chatId": chatprofile[i]._id } ;
+          regidObj['chatId'] = chatprofile[i]._id;
+          regidObj['firstname'] = chatprofile[i].member.firstname;
+          regidObj['lastname'] = chatprofile[i].member.lastname;
+          regidObj['primaryphone'] = chatprofile[i].member.primaryphone;
+          regidObj['email'] = chatprofile[i].member.email;
+          regidObj['employerid'] = chatprofile[i].member.employerid;
+          regidObj['employeeid'] = chatprofile[i].member.employeeid;
+          regidObj['delivered'] = chatprofile[i].member.delivered;
+          regidObj['read'] = chatprofile[i].member.read;
+          regidObj['last_seen'] = chatprofile[i].member.last_seen;
+          regidObj['registration_id'] = chatprofile[i].member.registration_id;
+
+          msgModel.find(findChatQuery,{},function(err,chat){
+
+
+          });
+
+          registrationids.push(regidObj);
+          regidObj = {};         
+      }
+       res.json(registrationids);
+    });
+};
+exports.findMessagesByChatId = function(req,res){
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+    var query = {"chatId":req.query.chatId}
+
+    var lteQuery;
+    var gteQuery
+    var toDate;
+    var fromDate;
+    var startTime = "T00:00:00.000Z";
+    var toTime = "T23:59:00.000Z";;
+    var messageDates = req.query.messageDates;
+
+    if(messageDates === '0') {
+      gteQuery = moment(new Date()).format("YYYY-MM-DD")+startTime;
+      lteQuery = moment(new Date()).format("YYYY-MM-DD")+toTime;
+      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    }
+    else if(messageDates === '1') {
+    
+      var today = new Date();
+      var yesterday = new Date(today);
+      yesterday.setDate(today.getDate()-1);
+
+      gteQuery = moment(yesterday).format("YYYY-MM-DD")+startTime;
+      lteQuery = moment(yesterday).format("YYYY-MM-DD")+toTime;
+
+      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    }
+    else if(messageDates === '2') {  
+
+      gteQuery = moment().startOf('isoweek').format("YYYY-MM-DD")+startTime;
+      lteQuery =  moment().endOf('isoweek').format("YYYY-MM-DD")+toTime;
+      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    }
+    else if(messageDates === '3') {  
+
+      gteQuery = moment().subtract(1, 'weeks').startOf('isoweek').format("YYYY-MM-DD")+startTime;
+      lteQuery =  moment().subtract(1, 'weeks').endOf('isoweek').format("YYYY-MM-DD")+toTime;
+      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    }
+    else if(messageDates === '4') {
+    
+      gteQuery = moment().startOf('month').format("YYYY-MM-DD")+startTime;
+            lteQuery   = moment().endOf('month').format("YYYY-MM-DD")+toTime;  
+      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    }
+    else if(messageDates === '5') {
+
+      gteQuery = moment().subtract(1, 'months').startOf('month').format("YYYY-MM-DD")+startTime;
+      lteQuery = moment().subtract(1, 'months').endOf('month').format("YYYY-MM-DD")+toTime;
+      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    }
+    else if(messageDates === '6') {
+
+      gteQuery = moment().startOf('year').format("YYYY-MM-DD")+startTime;
+          lteQuery   = moment().endOf('year').format("YYYY-MM-DD")+toTime; 
+      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    }
+
+    messageModel.find(query,{},function(err,chatprofile){
+        if(err) {
+             logger.error(err)
+             return res.send(err);
+         }          
+          res.json(chatprofile);
+        }).sort({ createdAt : -1});
+};
 exports.saveFCMregistrationToken = function(req,res){
 	res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -210,22 +376,15 @@ exports.pushMessageToDevice = function(req,res){
 		});
 	});
 };
-exports.chatMessageToDevice = function(req,res){
-	res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    
+exports.sendMessageToDevice = function(req,res){
     var chatId = req.body.chatId;
-    // var author_email = req.body.author.email;
-    // var author_firstname = req.body.author.firstname;
-    // var author_lastname = req.body.author.lastname;
-    // var author_employerid = req.body.author.employerid;
-    
     var author = {
     	email : req.body.author.email,
     	firstname : req.body.author.firstname,
     	lastname : req.body.author.lastname,
     	primaryphone:req.body.author.primaryphone,
-    	employerid : req.body.author.employerid
+    	employerid : req.body.author.employerid,
+    	employeeid : req.body.author.employeeid
     }
     var messagePayload = {
     	messageType : req.body.messagePayload.messageType,
@@ -234,19 +393,15 @@ exports.chatMessageToDevice = function(req,res){
     		email:req.body.messagePayload.receiver.email,
     		firstname:req.body.messagePayload.receiver.firstname,
     		lastname:req.body.messagePayload.receiver.lastname,
+    		employerid: req.body.messagePayload.receiver.employerid,
+      		employeeid: req.body.messagePayload.receiver.employeeid,
     		read:req.body.messagePayload.receiver.read,
     		delivered:req.body.messagePayload.receiver.delivered,
     		last_seen:req.body.messagePayload.receiver.last_seen,
     		registration_id : req.body.messagePayload.receiver.registration_id
     	} 
     }
-
-    //var receivere_mail_id = req.body.receiver.emailid;
-   // var receiver_registration_id = req.body.messagePayload.receiver.registration_id;
-
-    var messageformat = req.query.messageType;
-	
-	if(messageformat === 'notification'){
+	if(messagePayload.messageType === 'notification'){
 		message = req.body.message;
 		pushMessage(messagePayload.receiver.registration_id,message)
 			.then(([pushMessage]) =>{
@@ -258,8 +413,8 @@ exports.chatMessageToDevice = function(req,res){
 			})
 	}
 	else{
-		if(messageformat === 'text'){
-			Promise.all([saveMessageOnDb(chatId,author,messagePayload),pushMessages(messagePayload.receiver.registration_id,messagePayload.message)])
+		if(messagePayload.messageType === 'text'){
+			Promise.all([saveMessageOnDb(chatId,author,messagePayload),pushMessage(messagePayload.receiver.registration_id,messagePayload.message)])
 			.then(([saveMessage,pushMessage]) =>{
 				logger.info('text message saved on db and pushed to device');
 				res.status(200).send(saveMessage).end();
@@ -268,14 +423,14 @@ exports.chatMessageToDevice = function(req,res){
 				logger.error(error);
 			})
 		}
-		if(messageformat === 'image'){			
+		if(messagePayload.messageType === 'image'){			
 			var imgbase64 = messagePayload.message;//.split('&')[1];			
 			var imgFileExt = imgbase64.split(';')[0].match(/jpeg|png|gif/)[0];
 			var imgdata = imgbase64.replace(/^data:image\/\w+;base64,/, "");
 			var img_filename = mongoose.Types.ObjectId() + "."+ imgFileExt; //shortid.generate() + "."+ imgFileExt;
 
 			messagePayload.message = config.googlecloudstorage_url + bucket_name +'/'+img_filename;
-			 Promise.all([uploadImage(img_filename,imgdata),
+			 Promise.all([uploadImageOnGoogleStorage(img_filename,imgdata),
 							// .then(function(message){
 							// 	pushMessages(receiver_registration_id,message)
 							// 	.then(function(saveMessage){
@@ -296,9 +451,9 @@ exports.chatMessageToDevice = function(req,res){
 							 // })])
 							 ])
 			 .then(function(message){
-               	pushMessages(messagePayload.receiver.registration_id,message[0])
+               	pushMessage(messagePayload.receiver.registration_id,message[0])
 					.then(function(saveMessage){
-						logger.info('Image uploaded to server, saved on db and image url as message pushed to device');
+						logger.info('Image uploaded to server, saved on db and message pushed to device');
 						res.status(200).send(message[1]).end();
 					})
             })
@@ -364,58 +519,3 @@ exports.chatMessageToDevice = function(req,res){
 	// 		res.json(error);
 	// 	});	
 };
-exports.chatImageMessageToDevice = function(req,res){
-	res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    
-    var chatId = req.body.chatId;
-    var sender_email_id = req.body.sender.emailid;
-    var receivere_mail_id = req.body.receiver.emailid;
-    var receiver_registration_id = req.body.receiver.registration_id;
-    var messageformat = req.query.messageType;
-    var message;
-	
-	if(messageformat === 'notification'){
-		message = req.body.message;
-		pushMessage(receiver_registration_id,message)
-			.then(([pushMessage]) =>{
-				logger.info('message pushed to device');
-				res.send('Success');
-			})
-			.catch(error =>{
-				logger.error(error);
-			})
-	}
-	else{
-		if(messageformat === 'text'){
-			message =req.body.message;
-			Promise.all([saveMessage(chatId,sender_email_id,receivere_mail_id,message),pushMessage(receiver_registration_id,message)])
-			.then(([saveMessage,pushMessage]) =>{
-				logger.info('message saved and pushed to device');
-				res.send('Success');
-
-			})
-			.catch(error =>{
-				logger.error(error);
-			})
-		}
-		if(messageformat === 'image'){			
-			var imgbase64 = req.body.message.split('&')[1];			
-			var imgFileExt = imgbase64.split(';')[0].match(/jpeg|png|gif/)[0];
-			var imgdata = imgbase64.replace(/^data:image\/\w+;base64,/, "");
-			var img_filename = shortid.generate() + "."+ imgFileExt;
-
-			message = config.googlecloudstorage_url + bucket_name +'/'+img_filename;
-			Promise.all([chatImageMessageToDevice(img_filename,imgdata),saveMessage(chatId,sender_email_id,receivere_mail_id,message),pushMessage(receiver_registration_id,message)])
-			.then(([uploadImage,saveMessage,pushMessage]) =>{
-				logger.info('Image uploaded o server, message saved on Db and pushed to device');
-				res.send('Success');
-
-			})
-			.catch(error =>{
-				logger.error(error);
-			})			
-		}
-	}	
-
-}; 

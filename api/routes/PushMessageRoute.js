@@ -11,8 +11,10 @@ module.exports = function(app){
 
  pushMessageRoute.post('/message',pushMessageController.pushMessageToDevice);
  pushMessageRoute.post('/regtoken',pushMessageController.saveFCMregistrationToken);
- pushMessageRoute.post('/chat',pushMessageController.chatMessageToDevice);
- pushMessageRoute.post('/chat/image',pushMessageController.chatImageMessageToDevice);
+ pushMessageRoute.post('/chat/send',pushMessageController.sendMessageToDevice);
+ pushMessageRoute.post('/chat/create',pushMessageController.createChat);
+ pushMessageRoute.get('/chat',pushMessageController.findMessagesByChatId);
+ pushMessageRoute.get('/chat/:Id',pushMessageController.findChatMembers);
 
  app.use('/api',router);
 }

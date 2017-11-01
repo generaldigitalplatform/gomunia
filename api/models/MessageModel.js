@@ -12,7 +12,9 @@ var MessageSchema = new Schema({
         firstname:String,
         lastname:String,
         employerid:String,
-        primaryphone:Number
+        primaryphone:Number,
+        employeeid:String,
+        employerid:String
     },
     messagePayload: {
 	    messageType : String,
@@ -21,6 +23,8 @@ var MessageSchema = new Schema({
 	    	email:String,
 	    	firstname:String,
 	    	lastname:String,
+	    	employeeid:String,
+        	employerid:String,
 	    	registration_id:String,
 	    	read:Boolean,
 	    	delivered : Boolean,
