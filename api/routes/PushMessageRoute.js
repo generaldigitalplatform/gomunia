@@ -15,6 +15,9 @@ module.exports = function(app){
  pushMessageRoute.post('/chat/create',pushMessageController.createChat);
  pushMessageRoute.get('/chat',pushMessageController.findMessagesByChatId);
  pushMessageRoute.get('/chat/:Id',pushMessageController.findChatMembers);
+ pushMessageRoute.post('/chatgroup/create',pushMessageController.createChatGroup);
+ pushMessageRoute.post('/chatgroup/add/users',pushMessageController.addUsersToChatGroup);
+ pushMessageRoute.post('/chatgroup/remove/users',pushMessageController.removeUsersFromChatGroup);
 
  app.use('/api',router);
 }
