@@ -8,7 +8,8 @@ var ChatSchema = new Schema({
         lastname:String,
         primaryphone:Number,
         employeeid:String,
-        employerid:String
+        employerid:String,
+        registration_id:String
 	},
 	member: {
           email : String,
