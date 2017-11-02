@@ -606,19 +606,6 @@ checkIfChatCreated = function(createdBy,member){
        
     });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   });
 }
 exports.createChat = function(req,res){
@@ -869,7 +856,9 @@ exports.sendMessageToDevice = function(req,res){
     	lastname : req.body.author.lastname,
     	primaryphone:req.body.author.primaryphone,
     	employerid : req.body.author.employerid,
-    	employeeid : req.body.author.employeeid
+    	employeeid : req.body.author.employeeid,
+    	registration_id : req.body.author.registration_id
+
     }
     var messagePayload = {
     	messageType : req.body.messagePayload.messageType,
@@ -878,6 +867,7 @@ exports.sendMessageToDevice = function(req,res){
     		email:req.body.messagePayload.receiver.email,
     		firstname:req.body.messagePayload.receiver.firstname,
     		lastname:req.body.messagePayload.receiver.lastname,
+    		primaryphone:req.body.messagePayload.receiver.primaryphone,
     		employerid: req.body.messagePayload.receiver.employerid,
       		employeeid: req.body.messagePayload.receiver.employeeid,
     		read:req.body.messagePayload.receiver.read,
