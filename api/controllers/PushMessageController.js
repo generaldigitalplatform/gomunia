@@ -657,15 +657,45 @@ exports.findChatMembers = function(req,res){
 
     var regidObj={};
     var registrationids=[];
-    
+    var memObj = [];
+
     //var query = {"createdBy.employeeid": req.params.Id } ;
 	var query = {$or:[{"createdBy.employeeid":req.params.Id},{"member.employeeid":req.params.Id}]};
-    chatModel.find(query,{},function(err,chatprofile){
+    chatModel.find(query,{},function(err,chatprofiles){
     if(err) {
         logger.error(err)
   		res.status(500).send(err).end();
-    }else if(chatprofile){
-  		res.status(200).send(chatprofile).end();
+    }else if(chatprofiles){
+    	if(chatprofiles.length !== 0){
+
+	      var responseCount = 0;
+	      async.eachSeries(chatprofiles,function(chatprofile,callback) {
+	      messageModel.find({"chatId":chatprofile._id},function(err,response){
+	      	if(response.length !== 0){
+		    	memObj.push(chatprofile);
+		    }
+		    responseCount++;
+		    if (responseCount === Object.keys(chatprofiles).length)
+	        {
+	            res.status(200).send(memObj).end();
+	        }
+	      	 callback(err);
+	    	})
+	    },function(err) {
+	        if (err) {
+	        	reject(err);
+	        }
+	       
+	    });	
+
+
+
+
+
+
+	    	
+    	}
+  		
     }
   //  for(var i=0; i< Object.keys(chatprofile).length;i++){    
 
