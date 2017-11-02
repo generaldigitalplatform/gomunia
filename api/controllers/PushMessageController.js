@@ -167,11 +167,6 @@ buildChatObject = function(createdBy,member){
        
     });
 
-
-
-
-
-
   })
 }
 saveChatOnDb = function(chatObject){
@@ -230,21 +225,6 @@ getDeviceRegistrationIdsOnDb = function(chatGroupProfile){
         }  
     });
 }
-
-// function check (collection) {
-//     var records = [ { body: "Test 1"}, { body: "Test 2" } ];
-//     async.eachSeries(records,function(item,callback) {
-//         collection.find( item, function (err, rows) {
-//             console.log(rows);
-//             callback(err)
-//         });
-//     },function(err) {
-//         if (err) throw err;
-//         console.log("done");
-//     });
-// }
-
-
 buildChatGroupObject = function(createdBy,members,chatGroupName){
   return new Promise(function(resolve,reject){
     var chatGroupProfile = [];
