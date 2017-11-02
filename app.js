@@ -21,8 +21,10 @@ var connectionOptions = { server: { socketOptions: { keepAlive: 300000, connectT
 mongoose.connect(db.databaseUri,{useMongoClient:true});//,socketTimeoutMS:360000, connectTimeoutMS : 30000,keepAlive: true, reconnectTries: 30});
 
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+//app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '5mb'}));
+app.use(bodyParser.urlencoded({limit: '5mb'}));
 // app.use(express.static(path.join(__dirname, 'logs')));
 
 var employerRoute = require('./api/routes/employerRoute');
