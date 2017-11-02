@@ -332,7 +332,36 @@ addGroupUserOnDb = function(chatGroupProfile,members){
 removeGroupUserOnDb = function(chatGroupName,registrationids){
 //return new Promise(function(resolve,reject){
 
- //  	var query = {"chatGroupName":chatGroupName};
+	return new Promise(function(resolve,reject){
+   	var ids = registrationids;
+
+	var query = {"chatGroupName":chatGroupName};
+    async.eachSeries(registrationids,function(registrationid,callback) {
+    	
+        chatGroupModel.update(query, { "$pull" : { "members" : { "registration_id" :  registrationid } } } , { "multi" : true },function (err, response) {	        
+	        if (registrationids.length === ids.length)
+	        {		       		
+	            resolve();  
+	        }
+            callback(err)
+        });
+    },function(err) {
+        //if (err) throw err;
+        //console.log("done");
+    });
+  })
+}    
+//    	var query = {"chatGroupName":chatGroupName};
+//    	async.eachSeries(registrationids,function(registrationid,callback) {
+// 		chatGroupModel.update({ "chatGroupName" : chatGroupName} , { "$pull" : { "members" : { "registration_id" :  registrationid } } } , { "multi" : true }
+// 	        //    callback(err)
+//         );
+//     },function(err) {
+//         if (err) throw err;
+//         //console.log("done");
+//     });
+//     });
+// }
  //  	var chatGroupProfile;
 
  //  	async.eachSeries(registrationids,function(registrationid,callback) {
@@ -369,8 +398,8 @@ removeGroupUserOnDb = function(chatGroupName,registrationids){
 	//         //console.log("done");
 	//     }
 	// };
- //  });  
-}
+//    });  
+// }
  //  	chatGroupModel.find({"chatGroupName":chatGroupName},function(error, response){ 		
  //  		chatGroupModel.update({ },{ $pull: { "members": { $in: [ registrationids ] } },
 	//     { multi: true }
@@ -509,23 +538,35 @@ removeGroupUserOnGCM = function(chatGroupName,chatGroupNotification_key,members)
         });
     })   
 }
+checkIfChatCreated = function(createdBy,member){
+	//query = {$and: [{"member.email":member.email},{"createdBy.email":createdBy.email}]};
+	return new Promise(function(resolve,reject){
+	var query = {$or:[{$and: [{"member.email":member.email},{"createdBy.email":createdBy.email}]},
+	{$and: [{"createdBy.email":member.email},{"member.email":createdBy.email}]}]};	
 
+	chatModel.find(query,function(err,chatprofile){
+		if (err) {
+			reject(err);
+		}
+		if(chatprofile.length == 0)
+		{			
+			resolve(false);
+
+		}else{
+			resolve(chatprofile);
+		}
+	});
+  });
+}
 exports.createChat = function(req,res){
   var createdBy = req.body.createdBy;
   var member =  req.body.member;
-    // if(req.body.chatId){
-    //     var query = {"_id":req.body.chatId}
-    //     ChatModel.findOne(query,function(err,chatprofile){
-    //         if(err){
-    //              logger.error(err)
-    //              res.send(err);
-    //         }else{           
-    //             res.json(chatprofile);
-    //         }
-    //     });
-    // }
-    // else{
-  buildChatObject(createdBy,member)
+  checkIfChatCreated(createdBy,member)
+  .then(function(chatprofile){
+  	if(chatprofile){
+  		res.status(200).send(chatprofile).end();
+  	}else{
+  		  buildChatObject(createdBy,member)
   .then(function(members){
       saveChatOnDb(members)
       // Promise.all([
@@ -541,6 +582,10 @@ exports.createChat = function(req,res){
           res.send({error:error}).end();
       });
   })
+  	}
+  });
+
+
     //}
 };
 exports.findChatMembers = function(req,res){
@@ -550,39 +595,38 @@ exports.findChatMembers = function(req,res){
     var regidObj={};
     var registrationids=[];
     
-    var query = {"createdBy.employeeid": req.params.Id } ;
-
-    //var query = {"employee.employerid":req.params.Id}
-  
+    //var query = {"createdBy.employeeid": req.params.Id } ;
+	var query = {$or:[{"createdBy.employeeid":req.params.Id},{"member.employeeid":req.params.Id}]};
     chatModel.find(query,{},function(err,chatprofile){
     if(err) {
-           logger.error(err)
-           return res.send(err);
-       }
-       for(var i=0; i< Object.keys(chatprofile).length;i++){    
+        logger.error(err)
+  		res.status(500).send(err).end();
+    }else if(chatprofile){
+  		res.status(200).send(chatprofile).end();
+    }
+  //  for(var i=0; i< Object.keys(chatprofile).length;i++){    
 
-         var findChatQuery = {"chatId": chatprofile[i]._id } ;
-          regidObj['chatId'] = chatprofile[i]._id;
-          regidObj['firstname'] = chatprofile[i].member.firstname;
-          regidObj['lastname'] = chatprofile[i].member.lastname;
-          regidObj['primaryphone'] = chatprofile[i].member.primaryphone;
-          regidObj['email'] = chatprofile[i].member.email;
-          regidObj['employerid'] = chatprofile[i].member.employerid;
-          regidObj['employeeid'] = chatprofile[i].member.employeeid;
-          regidObj['delivered'] = chatprofile[i].member.delivered;
-          regidObj['read'] = chatprofile[i].member.read;
-          regidObj['last_seen'] = chatprofile[i].member.last_seen;
-          regidObj['registration_id'] = chatprofile[i].member.registration_id;
+  //    var findChatQuery = {"chatId": chatprofile[i]._id } ;
+  //     regidObj['chatId'] = chatprofile[i]._id;
+  //     regidObj['firstname'] = chatprofile[i].member.firstname;
+  //     regidObj['lastname'] = chatprofile[i].member.lastname;
+  //     regidObj['primaryphone'] = chatprofile[i].member.primaryphone;
+  //     regidObj['email'] = chatprofile[i].member.email;
+  //     regidObj['employerid'] = chatprofile[i].member.employerid;
+  //     regidObj['employeeid'] = chatprofile[i].member.employeeid;
+  //     regidObj['delivered'] = chatprofile[i].member.delivered;
+  //     regidObj['read'] = chatprofile[i].member.read;
+  //     regidObj['last_seen'] = chatprofile[i].member.last_seen;
+  //     regidObj['registration_id'] = chatprofile[i].member.registration_id;
 
-          messageModel.find(findChatQuery,{},function(err,chat){
+  //     messageModel.find(findChatQuery,{},function(err,chat){
 
 
-          });
+  //     });
 
-          registrationids.push(regidObj);
-          regidObj = {};         
-      }
-       res.json(registrationids);
+  //     registrationids.push(regidObj);
+  //     regidObj = {};         
+  // }
     });
 };
 exports.findMessagesByChatId = function(req,res){
