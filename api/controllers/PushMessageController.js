@@ -154,7 +154,7 @@ buildChatObject = function(createdBy,member){
 	        {	
 	       		regidObj['createdBy'] = createdByObj;
 	       		regidObj['member'] = memberObj;
-	        	//chatProfile.push(regidObj);
+	        	chatProfile.push(regidObj);
 	            resolve(regidObj);  
 	        }
             callback(err)
@@ -593,8 +593,9 @@ checkIfChatCreated = function(createdBy,member){
 		    }
 		    responseCount++;
 		    if (responseCount === Object.keys(queryies).length)
-	        {
-	            resolve(memObj);  
+	        {	
+	        	var mergedObj = Object.assign.apply(Object, memObj);
+	            resolve(mergedObj);  
 	        }
             callback(err)
         });
