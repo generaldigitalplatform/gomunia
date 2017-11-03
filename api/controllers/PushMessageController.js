@@ -1,7 +1,6 @@
 // 'use strict';
 
 var mongoose 		 = require('mongoose'),
-	mongoose = require('mongoose'),
  	admin 			 = require('firebase-admin'),
  	serviceAccount 	 = require('../config/gdsfieldforce-firebase-adminsdk-m5ezh-beffa09b38'),
 	pushMessageModel = require('../models/PushMessageModel'),
@@ -646,14 +645,14 @@ exports.findChatMembers = function(req,res){
     var registrationids=[];
     var memObj = [];
     var message = {
-    	message:String,
+    	lastmessage:String,
     	createdAt:Date
     };
 
 
     //var query = {"createdBy.employeeid": req.params.Id } ;
 	var query = {$or:[{"createdBy.employeeid":req.params.Id},{"member.employeeid":req.params.Id}]};
-    chatModel.find(query,{},function(err,chatprofiles){
+    chatModel.find(query,function(err,chatprofiles){
     if(err) {
         logger.error(err)
   		res.status(500).send(err).end();
@@ -663,40 +662,36 @@ exports.findChatMembers = function(req,res){
 	      var responseCount = 0;
 	      async.eachSeries(chatprofiles,function(chatprofile,callback) {
 	      messageModel.find({"chatId":chatprofile._id},function(err,response){
-	      	if(response.length !== 0){
-	      		if(response.messagePayload.messageType == 'text'){
-		    	message.message = response.messagePayload.message;
-		    }else if(response.messagePayload.messageType == 'image'){
-		    	message.message = 'Photo';
-		    }
-		    	message.createdAt = response.createdAt;
-		    	message["message"] = message;
-		    	chatprofile["message"] = message;
-		    	memObj.push(chatprofile);
-		    }
-		    responseCount++;
-		    if (responseCount === Object.keys(chatprofiles).length)
-	        {
-	            res.status(200).send(memObj).end();
-	        }
-	      	 callback(err);
-	    	})
-	    },function(err) {
-	        if (err) {
-	        	reject(err);
-	        }
-	       
-	    });	
-
-
-
-
-
-
+		      	if(response.length !== 0){
+			      		if(response[0].messagePayload.messageType == 'text'){ 
+				    	message.lastmessage = response[0].messagePayload.message;
+					    }else if(response[0].messagePayload.messageType == 'image'){
+					    	message.message = 'Photo';
+					    }
+				    	message.createdAt = response[0].createdAt;
+				    	//message["message"] = message;
+				    	chatprofile["message"] = message;
+				    	memObj.push(chatprofile);
+			    }
+			    responseCount++;
+			    if (responseCount === Object.keys(chatprofiles).length)
+		        {
+		            res.status(200).send(memObj).end();
+		        }
+		      	 callback(err);
+		    	}).sort({_id:-1}).limit(1)
+			    },function(err) {
+			        if (err) {
+			        	reject(err);
+			        }
+			       
+			    });	
 	    	
     	}
   		
     }
+    });
+};
   //  for(var i=0; i< Object.keys(chatprofile).length;i++){    
 
   //    var findChatQuery = {"chatId": chatprofile[i]._id } ;
@@ -720,8 +715,8 @@ exports.findChatMembers = function(req,res){
   //     registrationids.push(regidObj);
   //     regidObj = {};         
   // }
-    });
-};
+//     });
+// };
 exports.findMessagesByChatId = function(req,res){
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

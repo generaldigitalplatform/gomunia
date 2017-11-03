@@ -2,6 +2,10 @@ var mongoose = require('mongoose'),
 	Schema = mongoose.Schema;
 
 var ChatSchema = new Schema({	
+	message : {
+    	lastmessage:String,
+    	createdAt:Date
+    },
 	createdBy:{
 		email : String,
         firstname:String,
@@ -21,5 +25,4 @@ var ChatSchema = new Schema({
     	  registration_id:String
        }
 },{timestamps:true},{"strict":false})
-
-module.exports = mongoose.model("Chat",ChatSchema);
+module.exports = mongoose.model('Chat',ChatSchema);
