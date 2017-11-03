@@ -645,6 +645,8 @@ exports.findChatMembers = function(req,res){
     var regidObj={};
     var registrationids=[];
     var memObj = [];
+    var message = {};
+
 
     //var query = {"createdBy.employeeid": req.params.Id } ;
 	var query = {$or:[{"createdBy.employeeid":req.params.Id},{"member.employeeid":req.params.Id}]};
@@ -659,6 +661,10 @@ exports.findChatMembers = function(req,res){
 	      async.eachSeries(chatprofiles,function(chatprofile,callback) {
 	      messageModel.find({"chatId":chatprofile._id},function(err,response){
 	      	if(response.length !== 0){
+		    	message.message = response.messagePayload.message;
+		    	message.createdAt = response.createdAT;
+		    	message["message"] = message;
+		    	chatprofile["message"] = message;
 		    	memObj.push(chatprofile);
 		    }
 		    responseCount++;
