@@ -595,7 +595,29 @@ checkIfChatCreated = function(createdBy,member){
 		    if (responseCount === Object.keys(queryies).length)
 	        {	
 	        	var mergedObj = Object.assign.apply(Object, memObj);
-	            resolve(mergedObj);  
+
+	        	var obj = mergedObj.reduce(function(acc, cur, i) {
+				 // acc[i] = cur;
+				  resolve(cur);
+				}, {});
+
+
+
+	     //    	 var rv = {};
+				  // for (var i = 0; i < mergedObj.length; ++i)
+				  //   rv[i] = mergedObj[i];
+				  // resolve(rv);
+	  //       	var resultObject = memObj.reduce(function(result, currentObject) {
+			//     for(var key in currentObject) {
+			//         if (currentObject.hasOwnProperty(key)) {
+			//             result[key] = currentObject[key];
+			//         }
+			//     }
+			//     resolve(mergedObj);  
+			// }, {});
+
+
+	            
 	        }
             callback(err)
         });
