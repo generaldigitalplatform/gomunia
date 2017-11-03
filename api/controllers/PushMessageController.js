@@ -594,12 +594,18 @@ checkIfChatCreated = function(createdBy,member){
 		    responseCount++;
 		    if (responseCount === Object.keys(queryies).length)
 	        {	
-	        	var mergedObj = Object.assign.apply(Object, memObj);
-
-	        	var obj = mergedObj.reduce(function(acc, cur, i) {
-				 // acc[i] = cur;
-				  resolve(cur);
-				}, {});
+	        	
+	        	if(memObj.length === 0){
+	        		 resolve(memObj);
+	        		}else{
+	        			var mergedObj = Object.assign.apply(Object, memObj);
+	        			var obj = mergedObj.reduce(function(acc, cur, i) {
+						  acc[i] = cur;
+						  // return acc;
+						  resolve(cur);
+						}, {});
+	        		}
+	        	
 
 
 
