@@ -645,7 +645,10 @@ exports.findChatMembers = function(req,res){
     var regidObj={};
     var registrationids=[];
     var memObj = [];
-    var message = {};
+    var message = {
+    	message:String,
+    	createdAt:Date
+    };
 
 
     //var query = {"createdBy.employeeid": req.params.Id } ;
@@ -661,8 +664,12 @@ exports.findChatMembers = function(req,res){
 	      async.eachSeries(chatprofiles,function(chatprofile,callback) {
 	      messageModel.find({"chatId":chatprofile._id},function(err,response){
 	      	if(response.length !== 0){
+	      		if(response.messagePayload.messageType == 'text'){
 		    	message.message = response.messagePayload.message;
-		    	message.createdAt = response.createdAT;
+		    }else if(response.messagePayload.messageType == 'image'){
+		    	message.message = 'Photo';
+		    }
+		    	message.createdAt = response.createdAt;
 		    	message["message"] = message;
 		    	chatprofile["message"] = message;
 		    	memObj.push(chatprofile);
