@@ -82,14 +82,59 @@ uploadImageOnGoogleStorage = function(img_filename,imgdata){
 
 	})
 }
-pushMessage = function(receiver_registration_id,message){
+pushMessage = function(chatId,author,messagePayload){
 	return new Promise(function(resolve,reject){
-		var payload = {
-		  data: {
-		    message:message
-		  }
-		};
-		admin.messaging().sendToDevice(receiver_registration_id, payload)
+		// var payload = {
+		//   data: {
+		//     message:message
+		//   }
+		// };
+	// var from = {
+ //    	email : req.body.author.email,
+ //    	firstname : req.body.author.firstname,
+ //    	lastname : req.body.author.lastname,
+ //    	primaryphone:req.body.author.primaryphone,
+ //    	employerid : req.body.author.employerid,
+ //    	employeeid : req.body.author.employeeid,
+ //    	registration_id : req.body.author.registration_id
+ //    	}
+ //    var to = {
+ //    		email:req.body.messagePayload.receiver.email,
+ //    		firstname:req.body.messagePayload.receiver.firstname,
+ //    		lastname:req.body.messagePayload.receiver.lastname,
+ //    		primaryphone:req.body.messagePayload.receiver.primaryphone,
+ //    		employerid: req.body.messagePayload.receiver.employerid,
+ //      		employeeid: req.body.messagePayload.receiver.employeeid,      		
+ //    		registration_id : req.body.messagePayload.receiver.registration_id,
+ //    		message : req.body.messagePayload.message   	
+ //   		}
+	   	var payload = {
+	   		data:{
+	   		'chatId':chatId,
+	   		'author.email' : author.email,
+	   		'author.firstname' : author.firstname,
+	    	'author.lastname' : author.lastname,
+	    	'author.primaryphone':author.primaryphone,
+	    	'author.employerid' : author.employerid,
+	    	'author.employeeid' : author.employeeid,
+    		'author.registration_id' : author.registration_id,
+    		'messagePayload.messageType':messagePayload.messageType,
+    		'messagePayload.message':messagePayload.message,
+	    	'messagePayload.receiver.email' : messagePayload.receiver.email,
+	    	'messagePayload.receiver.firstname' : messagePayload.receiver.firstname,
+	    	'messagePayload.receiver.lastname' : messagePayload.receiver.lastname,
+	    	'messagePayload.receiver.primaryphone':messagePayload.receiver.primaryphone,
+	    	'messagePayload.receiver.employerid' : messagePayload.receiver.employerid,
+	    	'messagePayload.receiver.employeeid' : messagePayload.receiver.employeeid,
+	    	'messagePayload.receiver.registration_id' : messagePayload.receiver.registration_id,
+	    	'messagePayload.receiver.read' : messagePayload.receiver.read,
+	    	'messagePayload.receiver.delivered' : messagePayload.receiver.delivered,
+	    	'messagePayload.receiver.last_seen' : messagePayload.receiver.last_seen
+	   		}
+	   	}
+	   	var registrationToken = messagePayload.receiver.registration_id;
+
+		admin.messaging().sendToDevice(registrationToken, payload)
 		.then(function(response) {			
 			resolve(response);
 		})
@@ -887,32 +932,34 @@ exports.pushMessageToDevice = function(req,res){
 };
 exports.sendMessageToDevice = function(req,res){
     var chatId = req.body.chatId;
-    var author = {
-    	email : req.body.author.email,
-    	firstname : req.body.author.firstname,
-    	lastname : req.body.author.lastname,
-    	primaryphone:req.body.author.primaryphone,
-    	employerid : req.body.author.employerid,
-    	employeeid : req.body.author.employeeid,
-    	registration_id : req.body.author.registration_id
+    var author = req.body.author;
+    var messagePayload = req.body.messagePayload;
 
-    }
-    var messagePayload = {
-    	messageType : req.body.messagePayload.messageType,
-    	message : req.body.messagePayload.message,
-    	receiver : {
-    		email:req.body.messagePayload.receiver.email,
-    		firstname:req.body.messagePayload.receiver.firstname,
-    		lastname:req.body.messagePayload.receiver.lastname,
-    		primaryphone:req.body.messagePayload.receiver.primaryphone,
-    		employerid: req.body.messagePayload.receiver.employerid,
-      		employeeid: req.body.messagePayload.receiver.employeeid,
-    		read:req.body.messagePayload.receiver.read,
-    		delivered:req.body.messagePayload.receiver.delivered,
-    		last_seen:req.body.messagePayload.receiver.last_seen,
-    		registration_id : req.body.messagePayload.receiver.registration_id
-    	} 
-    }
+    // var author = {
+    // 	email : req.body.author.email,
+    // 	firstname : req.body.author.firstname,
+    // 	lastname : req.body.author.lastname,
+    // 	primaryphone:req.body.author.primaryphone,
+    // 	employerid : req.body.author.employerid,
+    // 	employeeid : req.body.author.employeeid,
+    // 	registration_id : req.body.author.registration_id
+    // }
+    // var messagePayload = {
+    // 	messageType : req.body.messagePayload.messageType,
+    // 	message : req.body.messagePayload.message,
+    // 	receiver : {
+    // 		email:req.body.messagePayload.receiver.email,
+    // 		firstname:req.body.messagePayload.receiver.firstname,
+    // 		lastname:req.body.messagePayload.receiver.lastname,
+    // 		primaryphone:req.body.messagePayload.receiver.primaryphone,
+    // 		employerid: req.body.messagePayload.receiver.employerid,
+    //   		employeeid: req.body.messagePayload.receiver.employeeid,
+    // 		read:req.body.messagePayload.receiver.read,
+    // 		delivered:req.body.messagePayload.receiver.delivered,
+    // 		last_seen:req.body.messagePayload.receiver.last_seen,
+    // 		registration_id : req.body.messagePayload.receiver.registration_id
+    // 	} 
+    // }
 	if(messagePayload.messageType === 'notification'){
 		message = req.body.message;
 		pushMessage(messagePayload.receiver.registration_id,message)
@@ -926,7 +973,8 @@ exports.sendMessageToDevice = function(req,res){
 	}
 	else{
 		if(messagePayload.messageType === 'text'){
-			Promise.all([saveMessageOnDb(chatId,author,messagePayload),pushMessage(messagePayload.receiver.registration_id,messagePayload.message)])
+			Promise.all([saveMessageOnDb(chatId,author,messagePayload),pushMessage(chatId,author,messagePayload)])
+			//Promise.all([saveMessageOnDb(chatId,author,messagePayload),pushMessage(messagePayload.receiver.registration_id,messagePayload.message)])
 			.then(([saveMessage,pushMessage]) =>{
 				logger.info('text message saved on db and pushed to device');
 				res.status(200).send(saveMessage).end();
