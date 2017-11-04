@@ -110,26 +110,26 @@ pushMessage = function(chatId,author,messagePayload){
  //   		}
 	   	var payload = {
 	   		data:{
-	   		'chatId':chatId,
-	   		'author.email' : author.email,
-	   		'author.firstname' : author.firstname,
-	    	'author.lastname' : author.lastname,
-	    	'author.primaryphone':author.primaryphone,
-	    	'author.employerid' : author.employerid,
-	    	'author.employeeid' : author.employeeid,
-    		'author.registration_id' : author.registration_id,
-    		'messagePayload.messageType':messagePayload.messageType,
-    		'messagePayload.message':messagePayload.message,
-	    	'messagePayload.receiver.email' : messagePayload.receiver.email,
-	    	'messagePayload.receiver.firstname' : messagePayload.receiver.firstname,
-	    	'messagePayload.receiver.lastname' : messagePayload.receiver.lastname,
-	    	'messagePayload.receiver.primaryphone':messagePayload.receiver.primaryphone,
-	    	'messagePayload.receiver.employerid' : messagePayload.receiver.employerid,
-	    	'messagePayload.receiver.employeeid' : messagePayload.receiver.employeeid,
-	    	'messagePayload.receiver.registration_id' : messagePayload.receiver.registration_id,
-	    	'messagePayload.receiver.read' : messagePayload.receiver.read,
-	    	'messagePayload.receiver.delivered' : messagePayload.receiver.delivered,
-	    	'messagePayload.receiver.last_seen' : messagePayload.receiver.last_seen
+	   		"chatId":chatId,
+	   		"author.email" : author.email,
+	   		"author.firstname" : author.firstname,
+	    	"author.lastname" : author.lastname,
+	    	"author.primaryphone":author.primaryphone,
+	    	"author.employerid" : author.employerid,
+	    	"author.employeeid" : author.employeeid,
+    		"author.registration_id": author.registration_id,
+    		"messagePayload.messageType":messagePayload.messageType,
+    		"messagePayload.message":messagePayload.message,
+	    	// 'messagePayload.receiver.email' : messagePayload.receiver.email,
+	    	// 'messagePayload.receiver.firstname' : messagePayload.receiver.firstname,
+	    	// 'messagePayload.receiver.lastname' : messagePayload.receiver.lastname,
+	    	// 'messagePayload.receiver.primaryphone':messagePayload.receiver.primaryphone,
+	    	// 'messagePayload.receiver.employerid' : messagePayload.receiver.employerid,
+	    	// 'messagePayload.receiver.employeeid' : messagePayload.receiver.employeeid,
+	    	// 'messagePayload.receiver.registration_id' : messagePayload.receiver.registration_id,
+	    	// 'messagePayload.receiver.read' : messagePayload.receiver.read,
+	    	// 'messagePayload.receiver.delivered' : messagePayload.receiver.delivered,
+	    	// 'messagePayload.receiver.last_seen' : messagePayload.receiver.last_seen
 	   		}
 	   	}
 	   	var registrationToken = messagePayload.receiver.registration_id;
