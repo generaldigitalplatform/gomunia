@@ -711,6 +711,14 @@ exports.createChat = function(req,res){
 
     //}
 };
+function swap(sourceObj, sourceKey, targetObj, targetKey) {
+	return new Promise(function(resolve,reject){
+	    var temp = sourceObj[sourceKey];
+	    sourceObj[sourceKey] = targetObj[targetKey];
+	    targetObj[targetKey] = temp;
+	    resolve(temp);
+	});
+}
 exports.findChatMembers = function(req,res){
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -727,44 +735,59 @@ exports.findChatMembers = function(req,res){
     //var query = {"createdBy.employeeid": req.params.Id } ;
 	var query = {$or:[{"createdBy.employeeid":req.params.Id},{"member.employeeid":req.params.Id}]};
     chatModel.find(query,function(err,chatprofiles){
-    if(err) {
-        logger.error(err)
-  		res.status(500).send(err).end();
-    }else if(chatprofiles){
-    	if(chatprofiles.length !== 0){
+	    if(err) {
+	        logger.error(err)
+	  		res.status(500).send(err).end();
+	    }else if(chatprofiles){
+	    	if(chatprofiles.length !== 0){
 
-	      var responseCount = 0;
-	      async.eachSeries(chatprofiles,function(chatprofile,callback) {
-	      messageModel.find({"chatId":chatprofile._id},function(err,response){
-		      	if(response.length !== 0){
-			      		if(response[0].messagePayload.messageType == 'text'){ 
-				    	message.lastmessage = response[0].messagePayload.message;
-					    }else if(response[0].messagePayload.messageType == 'image'){
-					    	message.message = 'Photo';
-					    }
-				    	message.createdAt = response[0].createdAt;
-				    	//message["message"] = message;
-				    	chatprofile["message"] = message;
-				    	memObj.push(chatprofile);
-			    }
-			    responseCount++;
-			    if (responseCount === Object.keys(chatprofiles).length)
-		        {
-		            res.status(200).send(memObj).end();
-		        }
-		      	 callback(err);
-		    	}).sort({_id:-1}).limit(1)
-			    },function(err) {
-			        if (err) {
-			        	reject(err);
+		      var responseCount = 0;
+		      async.eachSeries(chatprofiles,function(chatprofile,callback) {
+		      messageModel.find({"chatId":chatprofile._id},function(err,response){
+			      	if(response.length !== 0){
+				      		if(response[0].messagePayload.messageType == 'text'){ 
+					    	message.lastmessage = response[0].messagePayload.message;
+						    }else if(response[0].messagePayload.messageType == 'image'){
+						    	message.message = 'Photo';
+						    }
+					    	message.createdAt = response[0].createdAt;
+					    	//message["message"] = message;
+					    	chatprofile["message"] = message;
+					    	//chatprofile["createdBy"] = response[0].createdBy;
+					    	memObj.push(chatprofile);
+				    }
+				    responseCount++;
+				    if (responseCount === Object.keys(chatprofiles).length)
+			        {			       
+			        	var response = [{
+			        		"member":String,
+			        		"createdBy":String,
+			        		"message":String
+			        	}]; 	
+			        	for(var i=0; i< memObj.length; i++){
+
+			        		if(memObj[i].member.employeeid === req.params.Id ){
+			        			//response[i]['_id'] = memObj[i]._id;			        			
+			        			response[i]['member'] = memObj[i]['createdBy'];
+			        			response[i]['createdBy'] = memObj[i]['member'];
+			        			response[i]['message'] = memObj[i]['message'];	 	 
+			        		}
+			        	}
+			            res.status(200).send(response).end();
 			        }
-			       
-			    });	
-	    	
-    	}
-  		
-    }
-    });
+			      	 callback(err);
+			    	}).sort({_id:-1}).limit(1)
+				    },function(err) {
+				        if (err) {
+				        	reject(err);
+				        }
+				       
+				    });	
+		    	
+	    	}
+	  		
+	    }
+	});
 };
   //  for(var i=0; i< Object.keys(chatprofile).length;i++){    
 
