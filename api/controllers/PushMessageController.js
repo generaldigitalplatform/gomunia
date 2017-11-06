@@ -646,7 +646,11 @@ exports.findChatMembers = function(req,res){
 	    if(err) {
 	        logger.error(err)
 	  		res.status(500).send(err).end();
-	    }else if(chatprofiles){
+	    }
+	    if(chatprofiles.length === 0) {
+	       	res.status(500).send(chatprofiles).end();
+	    }
+	    else if(chatprofiles){
 	    	if(chatprofiles.length !== 0){
 
 		      var responseCount = 0;
@@ -666,8 +670,14 @@ exports.findChatMembers = function(req,res){
 				    }
 				    responseCount++;
 				    if (responseCount === Object.keys(chatprofiles).length)
-			        {   
-			        	var response = [{
+			        {   			        	
+						if(memObj.length === 0){
+							res.status(200).send(memObj).end();
+						}
+			        	
+						else{
+
+							      	var response = [{
 			        		"member":String,
 			        		"createdBy":String,
 			        		"message":String
@@ -692,6 +702,8 @@ exports.findChatMembers = function(req,res){
 			        		}
 			        	}
 			            res.status(200).send(response).end();
+						}
+			  
 			        }
 			      	 callback(err);
 			    	}).sort({_id:-1}).limit(1)
