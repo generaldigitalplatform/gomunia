@@ -33,7 +33,6 @@ admin.initializeApp({
 //Define bucket.
 const bucket_name = 'gdsfieldforce.appspot.com' ;
 var myBucket = gcs.bucket(bucket_name);
-
 // var storage = multer.diskStorage({
 //   destination: function (req, file, cb) {
 //     cb(null, './public/')
@@ -394,8 +393,6 @@ addGroupUserOnDb = function(chatGroupProfile,members){
   })    
 }
 removeGroupUserOnDb = function(chatGroupName,registrationids){
-//return new Promise(function(resolve,reject){
-
 	return new Promise(function(resolve,reject){
    	var ids = registrationids;
 
@@ -414,92 +411,7 @@ removeGroupUserOnDb = function(chatGroupName,registrationids){
         //console.log("done");
     });
   })
-}    
-//    	var query = {"chatGroupName":chatGroupName};
-//    	async.eachSeries(registrationids,function(registrationid,callback) {
-// 		chatGroupModel.update({ "chatGroupName" : chatGroupName} , { "$pull" : { "members" : { "registration_id" :  registrationid } } } , { "multi" : true }
-// 	        //    callback(err)
-//         );
-//     },function(err) {
-//         if (err) throw err;
-//         //console.log("done");
-//     });
-//     });
-// }
- //  	var chatGroupProfile;
-
- //  	async.eachSeries(registrationids,function(registrationid,callback) {
- //  		if(chatGroupProfile){
-	//   		chatGroupModel.find({"chatGroupName":chatGroupName},function(error, chatGroupProfile){ 
-	//   			chatGroupModel.findOneAndUpdate(query, { $pull: { "members": { "registration_ids": registrationid } }},{ multi: true }, function(err, data){
-	// 	        if(err) {
-	// 	          return res.status(500).json({'error' : 'error in deleting address'});
-	// 	        }
-	// 	        if (registration_ids.length === Object.keys(members).length)
-	// 	        {
-	// 	            resolve(chatGroupProfile);  
-	// 	        }
-	// 	        callback(err)
-	//         });
-	// 	    },function(err) {
-	// 	        if (err) throw err;
-	// 	        //console.log("done");
-	// 	    });
- //  		}
- //       	else{
- //       		chatGroupModel.findOneAndUpdate(query, { $pull: { "members": { "registration_ids": registrationid } }},{ multi: true }, function(err, data){
-	//         if(err) {
-	//           return res.status(500).json({'error' : 'error in deleting address'});
-	//         }
-	//         if (registration_ids.length === Object.keys(members).length)
-	//         {
-	//             resolve(chatGroupProfile);  
-	//         }
-	//         callback(err)
- //        });
-	//     },function(err) {
-	//         if (err) throw err;
-	//         //console.log("done");
-	//     }
-	// };
-//    });  
-// }
- //  	chatGroupModel.find({"chatGroupName":chatGroupName},function(error, response){ 		
- //  		chatGroupModel.update({ },{ $pull: { "members": { $in: [ registrationids ] } },
-	//     { multi: true }
-	// )
-
-
- //  	}))
- //  	chatGroupProfile.update(
-	//     { },
-	//     { $pull: { "items" : { id: 23 } } },
-	//     { $pull: { "members": { $in: [ { id: 23 },{ id: 23 } ] }, vegetables: "carrots" } },
-	//     { multi: true }
-	// )
-
-    // for(var i=0; i<member.length; i++){
-    //     var notificationIdsIndex = chatGroupProfile.members[i].registration_id.indexOf(member[i])
-    //     if(notificationIdsIndex == -1){
-            
-    //     }else{
-    //         chatGroupProfile.members[i].notification_ids.splice(notificationIdsIndex,1);
-    //     }
-    // }
-//     chatGroupProfile.save(function(error){
-//         if(error){
-//             reject(error);
-//             // logger.info('failed to add Members into the ChatGroup '+ req.body.notification_key_groupname)          
-//             // response.status(500).send({error:error});
-//         }
-//         else{
-//             resolve();
-//             // logger.info('Members added into the ChatGroup '+ req.body.notification_key_groupname)          
-//             // response.status(200).send("Success");
-//         }
-//     })
-//   })    
-// }
+} 
 createGroupOnGCM = function(chatGroupName,registrationids){
     return new Promise(function(resolve,reject){        
         const options = {
@@ -711,14 +623,6 @@ exports.createChat = function(req,res){
 
     //}
 };
-function swap(sourceObj, sourceKey, targetObj, targetKey) {
-	return new Promise(function(resolve,reject){
-	    var temp = sourceObj[sourceKey];
-	    sourceObj[sourceKey] = targetObj[targetKey];
-	    targetObj[targetKey] = temp;
-	    resolve(temp);
-	});
-}
 exports.findChatMembers = function(req,res){
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -730,9 +634,6 @@ exports.findChatMembers = function(req,res){
     	lastmessage:String,
     	createdAt:Date
     };
-
-
-    //var query = {"createdBy.employeeid": req.params.Id } ;
 	var query = {$or:[{"createdBy.employeeid":req.params.Id},{"member.employeeid":req.params.Id}]};
     chatModel.find(query,function(err,chatprofiles){
 	    if(err) {
@@ -788,32 +689,7 @@ exports.findChatMembers = function(req,res){
 	  		
 	    }
 	});
-};
-  //  for(var i=0; i< Object.keys(chatprofile).length;i++){    
-
-  //    var findChatQuery = {"chatId": chatprofile[i]._id } ;
-  //     regidObj['chatId'] = chatprofile[i]._id;
-  //     regidObj['firstname'] = chatprofile[i].member.firstname;
-  //     regidObj['lastname'] = chatprofile[i].member.lastname;
-  //     regidObj['primaryphone'] = chatprofile[i].member.primaryphone;
-  //     regidObj['email'] = chatprofile[i].member.email;
-  //     regidObj['employerid'] = chatprofile[i].member.employerid;
-  //     regidObj['employeeid'] = chatprofile[i].member.employeeid;
-  //     regidObj['delivered'] = chatprofile[i].member.delivered;
-  //     regidObj['read'] = chatprofile[i].member.read;
-  //     regidObj['last_seen'] = chatprofile[i].member.last_seen;
-  //     regidObj['registration_id'] = chatprofile[i].member.registration_id;
-
-  //     messageModel.find(findChatQuery,{},function(err,chat){
-
-
-  //     });
-
-  //     registrationids.push(regidObj);
-  //     regidObj = {};         
-  // }
-//     });
-// };
+}; 
 exports.findMessagesByChatId = function(req,res){
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -875,7 +751,7 @@ exports.findMessagesByChatId = function(req,res){
       query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
     }
 
-    messageModel.find(query,{},function(err,chatprofile){
+    messageModel.find(query,function(err,chatprofile){
         if(err) {
              logger.error(err)
              return res.send(err);
@@ -1068,7 +944,6 @@ exports.sendMessageToDevice = function(req,res){
 		}
 	}
 };
-
 exports.createChatGroup = function(req,res){
     var createdBy = req.body.createdBy;
   	var members =  req.body.members;
