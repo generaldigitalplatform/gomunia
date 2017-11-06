@@ -634,6 +634,8 @@ exports.findChatMembers = function(req,res){
     	lastmessage:String,
     	createdAt:Date
     };
+    var response = [];
+
 	var query = {$or:[{"createdBy.employeeid":req.params.Id},{"member.employeeid":req.params.Id}]};
     chatModel.find(query,function(err,chatprofiles){
 	    if(err) {
@@ -659,22 +661,32 @@ exports.findChatMembers = function(req,res){
 				    }
 				    responseCount++;
 				    if (responseCount === Object.keys(chatprofiles).length)
-			        {			       
-			        	var response = [{
+			        {   
+			        	var author = [{
 			        		"member":String,
 			        		"createdBy":String,
 			        		"message":String
-			        	}]; 	
-			        	for(var i=0; i< memObj.length; i++){
-
+			        	}];
+			        	var member = [{
+			        		"member":String,
+			        		"createdBy":String,
+			        		"message":String
+			        	}];
+			        	var chatList = [];  
+			           	for(var i=0; i< memObj.length; i++){
 			        		if(memObj[i].member.employeeid === req.params.Id ){
-			        			//response[i]['_id'] = memObj[i]._id;			        			
-			        			response[i]['member'] = memObj[i]['createdBy'];
-			        			response[i]['createdBy'] = memObj[i]['member'];
-			        			response[i]['message'] = memObj[i]['message'];	 	 
+			        			member[i]['member'] = memObj[i]['createdBy'];
+			        			member[i]['createdBy'] = memObj[i]['member'];
+			        			member[i]['message'] = memObj[i]['message'];
+			        			chatList.push(member);	 	 
+			        		}if(memObj[i].createdBy.employeeid === req.params.Id){
+			        			author[i]['member'] = memObj[i]['member'];
+			        			author[i]['createdBy'] = memObj[i]['createdBy'];
+			        			author[i]['message'] = memObj[i]['message'];
+			        			chatList.push(author);	 
 			        		}
 			        	}
-			            res.status(200).send(response).end();
+			            res.status(200).send(chatList).end();
 			        }
 			      	 callback(err);
 			    	}).sort({_id:-1}).limit(1)
