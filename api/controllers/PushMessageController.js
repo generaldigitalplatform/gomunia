@@ -653,9 +653,9 @@ exports.findChatMembers = function(req,res){
 		      async.eachSeries(chatprofiles,function(chatprofile,callback) {
 		      messageModel.find({"chatId":chatprofile._id},function(err,response){
 			      	if(response.length !== 0){
-				      		if(response[0].messagePayload.messageType == 'text'){ 
+				      		if(response[0].messagePayload.messageType === 'text'){ 
 					    	message.lastmessage = response[0].messagePayload.message;
-						    }else if(response[0].messagePayload.messageType == 'image'){
+						    }else if(response[0].messagePayload.messageType === 'image'){
 						    	message.message = 'Photo';
 						    }
 					    	message.createdAt = response[0].createdAt;
@@ -667,31 +667,31 @@ exports.findChatMembers = function(req,res){
 				    responseCount++;
 				    if (responseCount === Object.keys(chatprofiles).length)
 			        {   
-			        	var author = [{
+			        	var response = [{
 			        		"member":String,
 			        		"createdBy":String,
 			        		"message":String
 			        	}];
-			        	var member = [{
-			        		"member":String,
-			        		"createdBy":String,
-			        		"message":String
-			        	}];
-			        	var chatList = [];  
+			        	// var member = [{
+			        	// 	"member":String,
+			        	// 	"createdBy":String,
+			        	// 	"message":String
+			        	// }];
+			        	//var chatList = [];  
 			           	for(var i=0; i< memObj.length; i++){
 			        		if(memObj[i].member.employeeid === req.params.Id ){
-			        			member[i]['member'] = memObj[i]['createdBy'];
-			        			member[i]['createdBy'] = memObj[i]['member'];
-			        			member[i]['message'] = memObj[i]['message'];
-			        			chatList.push(member);	 	 
+			        			response[i]['member'] = memObj[i]['createdBy'];
+			        			response[i]['createdBy'] = memObj[i]['member'];
+			        			response[i]['message'] = memObj[i]['message'];
+			        		//	chatList.push(member);	 	 
 			        		}if(memObj[i].createdBy.employeeid === req.params.Id){
-			        			author[i]['member'] = memObj[i]['member'];
-			        			author[i]['createdBy'] = memObj[i]['createdBy'];
-			        			author[i]['message'] = memObj[i]['message'];
-			        			chatList.push(author);	 
+			        			response[i]['member'] = memObj[i]['member'];
+			        			response[i]['createdBy'] = memObj[i]['createdBy'];
+			        			response[i]['message'] = memObj[i]['message'];
+			        		//	chatList.push(author);	 
 			        		}
 			        	}
-			            res.status(200).send(chatList).end();
+			            res.status(200).send(response).end();
 			        }
 			      	 callback(err);
 			    	}).sort({_id:-1}).limit(1)
