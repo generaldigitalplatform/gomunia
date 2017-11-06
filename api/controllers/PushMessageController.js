@@ -514,6 +514,20 @@ removeGroupUserOnGCM = function(chatGroupName,chatGroupNotification_key,members)
         });
     })   
 }
+checkWhoIscreatedAndWhoIsMember = function(chatProfile,createdBy,member){
+   //	return new Promise(function(resolve,reject){
+		var chatList = []; 
+		if(chatProfile.createdBy.employeeid === member.employeeid ){
+			chatProfile['member'] = createdBy;
+			chatProfile['createdBy'] = member;	 	 
+		}if(chatProfile.member.employeeid === createdBy.employeeid){
+			chatProfile['createdBy'] = member;
+			chatProfile['member'] = createdBy;	 
+		}
+		return chatProfile;
+	//	reslove(chatProfile);
+	//});
+}
 checkIfChatCreated = function(createdBy,member){
 	//query = {$and: [{"member.email":member.email},{"createdBy.email":createdBy.email}]};
 	return new Promise(function(resolve,reject){
@@ -537,59 +551,47 @@ checkIfChatCreated = function(createdBy,member){
 		var queryies = [{$and: [{"member.email":member.email},{"createdBy.email":createdBy.email}]}
 						,{$and: [{"member.email":createdBy.email},{"createdBy.email":member.email}]}
 					   ];
-		//var query = {$and: [{"member.email":member.email},{"createdBy.email":createdBy.email}]}
-		var responseCount = 0;
-		var memObj = [];
+		var createdbyQuery = {$and: [{"member.email":member.email},{"createdBy.email":createdBy.email}]}
+		var memberbyQuery = {$and: [{"member.email":createdBy.email},{"createdBy.email":member.email}]}
 
-	    async.eachSeries(queryies,function(query,callback) {
-        chatModel.find(query, function (err, response) {
+		var responseCount = 0;
+		//var memObj = [];
+
+	   // async.eachSeries(queryies,function(query,callback) {
+        chatModel.find(createdbyQuery, function (err, response) {
 	    	//memberObjs.registration_id = response[0].FCMregistrationToken;
 		   // registration_ids.push(response[0].FCMregistrationToken); 	       
 		    if(response.length !== 0){
-		    	memObj.push(response);
+		    //	memObj.push(response);
+		    	resolve(response);
+		    }else{
+		    	chatModel.find(memberbyQuery, function (err, response) {
+			//		memObj.push(response);
+			    	resolve(response);
+		    	})
 		    }
-		    responseCount++;
-		    if (responseCount === Object.keys(queryies).length)
-	        {	
-	        	
-	        	if(memObj.length === 0){
-	        		 resolve(memObj);
-	        		}else{
-	        			var mergedObj = Object.assign.apply(Object, memObj);
-	        			var obj = mergedObj.reduce(function(acc, cur, i) {
-						  acc[i] = cur;
-						  // return acc;
-						  resolve(cur);
-						}, {});
-	        		}
-	        	
-
-
-
-	     //    	 var rv = {};
-				  // for (var i = 0; i < mergedObj.length; ++i)
-				  //   rv[i] = mergedObj[i];
-				  // resolve(rv);
-	  //       	var resultObject = memObj.reduce(function(result, currentObject) {
-			//     for(var key in currentObject) {
-			//         if (currentObject.hasOwnProperty(key)) {
-			//             result[key] = currentObject[key];
-			//         }
-			//     }
-			//     resolve(mergedObj);  
-			// }, {});
-
-
-	            
-	        }
-            callback(err)
+		    // responseCount++;
+		    // if (responseCount === Object.keys(queryies).length)
+	     //    {
+	     //    	if(memObj.length === 0){
+	     //    		 resolve(memObj);
+	     //    		}else{
+	     //    			var mergedObj = Object.assign.apply(Object, memObj);
+	     //    			var obj = mergedObj.reduce(function(acc, cur, i) {
+						//   acc[i] = cur;
+						//   // return acc;
+						//   resolve(cur);
+						// }, {});
+	     //    		}
+	     //    }
+      //       callback(err)
         });
-    },function(err) {
-        if (err) {
-        	reject(err);
-        }
+    // },function(err) {
+    //     if (err) {
+    //     	reject(err);
+    //     }
        
-    });
+    // });
 
   });
 }
@@ -599,7 +601,10 @@ exports.createChat = function(req,res){
   checkIfChatCreated(createdBy,member)
   .then(function(chatprofile){
   	if(chatprofile.length !== 0){
-  		res.status(200).send(chatprofile).end();
+  		chatProfile = checkWhoIscreatedAndWhoIsMember(chatprofile[0],createdBy,member)
+  		//.then(function(chatProfile){
+  			res.status(200).send(chatProfile).end();
+  	//	})
   	}else{
   		  buildChatObject(createdBy,member)
   .then(function(members){
