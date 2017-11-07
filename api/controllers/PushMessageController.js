@@ -948,7 +948,7 @@ exports.sendMessageToDevice = function(req,res){
 			var img_filename = mongoose.Types.ObjectId() + "."+ imgFileExt; //shortid.generate() + "."+ imgFileExt;
 
 			messagePayload.message = config.googlecloudstorage_url + bucket_name +'/'+img_filename;
-			 Promise.all([uploadImageOnGoogleStorage(img_filename,imgdata),
+			Promise.all([uploadImageOnGoogleStorage(img_filename,imgdata),
 							// .then(function(message){
 							// 	pushMessages(receiver_registration_id,message)
 							// 	.then(function(saveMessage){
@@ -969,7 +969,7 @@ exports.sendMessageToDevice = function(req,res){
 							 // })])
 							 ])
 			 .then(function(message){
-               	pushMessage(messagePayload.receiver.registration_id,message[0])
+               	pushMessage(chatId,author,messagePayload)
 					.then(function(saveMessage){
 						logger.info('Image uploaded to server, saved on db and message pushed to device');
 						res.status(200).send(message[1]).end();
