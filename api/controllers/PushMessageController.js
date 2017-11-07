@@ -705,7 +705,7 @@ exports.findChatMembers = function(req,res){
 						else{
 
 							var response = [{
-							 "chatId":String,
+							 "chatId":Object,
 			        		"member":String,
 			        		"createdBy":String,
 			        		"message":String
@@ -718,14 +718,14 @@ exports.findChatMembers = function(req,res){
 			        	//var chatList = [];  
 			           	for(var i=0; i< memObj.length; i++){
 			        		if(memObj[i].member.employeeid === req.params.Id ){
-			        			console.log(memObj[i]._id);
+			        			console.log("member Object id  is" + memObj[i]._id);
 			        			response[i]['chatId'] = memObj[i]._id;
 			        			response[i]['member'] = memObj[i]['createdBy'];
 			        			response[i]['createdBy'] = memObj[i]['member'];
 			        			response[i]['message'] = memObj[i]['message'];
 			        		//	chatList.push(member);	 	 
 			        		}if(memObj[i].createdBy.employeeid === req.params.Id){
-			        			console.log(memObj[i]._id);
+			        			console.log("createdby Object id  is" + memObj[i]._id);
 			        			response[i]['chatId'] = memObj[i]._id;
 			        			response[i]['member'] = memObj[i]['member'];
 			        			response[i]['createdBy'] = memObj[i]['createdBy'];
