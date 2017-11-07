@@ -589,8 +589,12 @@ checkIfChatCreated = function(createdBy,member){
 		    	resolve(response[0]);
 		    }else{
 		    	chatModel.find(memberbyQuery, function (err, response) {
-			//		memObj.push(response);
+
+		    	if(response.length !== 0){
 			    	resolve(response[0]);
+			    }else{
+			    	resolve(response);
+			    }
 		    	})
 		    }
 		    // responseCount++;
