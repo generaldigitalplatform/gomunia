@@ -186,9 +186,9 @@ buildChatObject = function(createdBy,member){
       async.eachSeries(chatMembersObj,function(chatMemberObj,callback) {
         FCMModel.find({"UserId":chatMemberObj.email}, function (err, response) {
         	if(chatMemberObj.email === createdByObj.email ){
-        		createdByObj.registration_id = response[0].FCMregistrationToken;
+        		createdBy.registration_id = response[0].FCMregistrationToken;
         	}else if(chatMemberObj.email === memberObj.email ){
-        		memberObj.registration_id = response[0].FCMregistrationToken;
+        		member.registration_id = response[0].FCMregistrationToken;
         	}	        
 	    	//memberObjs.registration_id = response[0].FCMregistrationToken;
 		   // registration_ids.push(response[0].FCMregistrationToken); 	       
@@ -198,8 +198,9 @@ buildChatObject = function(createdBy,member){
 	        {	
 	       		regidObj['createdBy'] = createdByObj;
 	       		regidObj['member'] = memberObj;
-	        	chatProfile.push(regidObj);
-	            resolve(regidObj);  
+	        	//chatProfile.push(regidObj);
+	        	var resObj = {createdBy,member}
+	            resolve(resObj);  
 	        }
             callback(err)
         });
@@ -549,7 +550,6 @@ checkWhoIscreatedAndWhoIsMember = function(chatProfile,createdBy,member){
 	 //        		}
 	 //        	}
 
-
 }
 checkIfChatCreated = function(createdBy,member){
 	//query = {$and: [{"member.email":member.email},{"createdBy.email":createdBy.email}]};
@@ -629,7 +629,7 @@ exports.createChat = function(req,res){
   			res.status(200).send(chatprofile).end();
   	//	})
   	}else{
-  		  buildChatObject(createdBy,member)
+   buildChatObject(createdBy,member)
   .then(function(members){
       saveChatOnDb(members)
       // Promise.all([
