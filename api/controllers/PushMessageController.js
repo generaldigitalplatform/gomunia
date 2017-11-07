@@ -687,7 +687,7 @@ exports.findChatMembers = function(req,res){
 				      		if(response[0].messagePayload.messageType === 'text'){ 
 					    	message.lastmessage = response[0].messagePayload.message;
 						    }else if(response[0].messagePayload.messageType === 'image'){
-						    	message.message = 'Photo';
+						    message.lastmessage = 'Photo';
 						    }
 					    	message.createdAt = response[0].createdAt;
 					    	//message["message"] = message;
@@ -704,13 +704,8 @@ exports.findChatMembers = function(req,res){
 			        	
 						else{
 
-							var chatObj = {
-							 "chatId":Object,
-			        		"member":{},
-			        		"createdBy":{},
-			        		"message":String
-			        	};
-			        	var response = []
+							
+			        	var response = [];
 			        	// var member = [{
 			        	// 	"member":String,
 			        	// 	"createdBy":String,
@@ -718,6 +713,12 @@ exports.findChatMembers = function(req,res){
 			        	// }];
 			        	//var chatList = [];  
 			           	for(var i=0; i< memObj.length; i++){
+			           		var chatObj = {
+							 "chatId":Object,
+			        		"member":{},
+			        		"createdBy":{},
+			        		"message":String
+			        	};
 			        		if(memObj[i].member.employeeid === req.params.Id ){
 			        			chatObj.chatId = memObj[i]._id;
 			        			chatObj.member = memObj[i]['createdBy'];
