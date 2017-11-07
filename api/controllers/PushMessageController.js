@@ -626,7 +626,7 @@ exports.createChat = function(req,res){
   	if(chatprofile.length !== 0){
   		//chatProfile = checkWhoIscreatedAndWhoIsMember(chatprofile[0],createdBy,member)
   		//.then(function(chatProfile){
-  			res.status(200).send(chatProfile).end();
+  			res.status(200).send(chatprofile).end();
   	//	})
   	}else{
   		  buildChatObject(createdBy,member)
