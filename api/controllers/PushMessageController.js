@@ -532,8 +532,24 @@ checkWhoIscreatedAndWhoIsMember = function(chatProfile,createdBy,member){
 			chatProfile['member'] = createdBy;	 
 		}
 		return chatProfile;
-	//	reslove(chatProfile);
-	//});
+	
+		// for(var i=0; i< memObj.length; i++){
+	 //        		if(memObj[i].member.employeeid === req.params.Id ){
+	 //        			response[i]['chatId'] = memObj[i]._id;
+	 //        			response[i]['member'] = memObj[i]['createdBy'];
+	 //        			response[i]['createdBy'] = memObj[i]['member'];
+	 //        			response[i]['message'] = memObj[i]['message'];
+	 //        		//	chatList.push(member);	 	 
+	 //        		}if(memObj[i].createdBy.employeeid === req.params.Id){
+	 //        			response[i]['chatId'] = memObj[i]._id;
+	 //        			response[i]['member'] = memObj[i]['member'];
+	 //        			response[i]['createdBy'] = memObj[i]['createdBy'];
+	 //        			response[i]['message'] = memObj[i]['message'];
+	 //        		//	chatList.push(author);	 
+	 //        		}
+	 //        	}
+
+
 }
 checkIfChatCreated = function(createdBy,member){
 	//query = {$and: [{"member.email":member.email},{"createdBy.email":createdBy.email}]};
@@ -608,7 +624,7 @@ exports.createChat = function(req,res){
   checkIfChatCreated(createdBy,member)
   .then(function(chatprofile){
   	if(chatprofile.length !== 0){
-  		chatProfile = checkWhoIscreatedAndWhoIsMember(chatprofile[0],createdBy,member)
+  		//chatProfile = checkWhoIscreatedAndWhoIsMember(chatprofile[0],createdBy,member)
   		//.then(function(chatProfile){
   			res.status(200).send(chatProfile).end();
   	//	})
