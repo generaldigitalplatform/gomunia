@@ -586,11 +586,11 @@ checkIfChatCreated = function(createdBy,member){
 		   // registration_ids.push(response[0].FCMregistrationToken); 	       
 		    if(response.length !== 0){
 		    //	memObj.push(response);
-		    	resolve(response);
+		    	resolve(response[0]);
 		    }else{
 		    	chatModel.find(memberbyQuery, function (err, response) {
 			//		memObj.push(response);
-			    	resolve(response);
+			    	resolve(response[0]);
 		    	})
 		    }
 		    // responseCount++;
