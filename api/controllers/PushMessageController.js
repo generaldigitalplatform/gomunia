@@ -516,7 +516,14 @@ removeGroupUserOnGCM = function(chatGroupName,chatGroupNotification_key,members)
 }
 checkWhoIscreatedAndWhoIsMember = function(chatProfile,createdBy,member){
    //	return new Promise(function(resolve,reject){
-		var chatList = []; 
+		var chatList = [];
+		if(chatProfile.createdBy.employeeid === createdBy.employeeid ){
+			chatProfile['member'] = member;
+			chatProfile['createdBy'] = createdBy;	 	 
+		}if(chatProfile.member.employeeid === member.employeeid){
+			chatProfile['createdBy'] = createdBy;
+			chatProfile['member'] = member;	 
+		} 
 		if(chatProfile.createdBy.employeeid === member.employeeid ){
 			chatProfile['member'] = createdBy;
 			chatProfile['createdBy'] = member;	 	 
