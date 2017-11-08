@@ -110,34 +110,37 @@ pushMessage = function(chatId,author,messagePayload){
 	   	var payload = {
 	   		data:{
 	   		"chatId":chatId,
-	   		"author.email" : author.email,
-	   		"author.firstname" : author.firstname,
-	    	"author.lastname" : author.lastname,
-	    	"author.primaryphone":author.primaryphone,
-	    	"author.employerid" : author.employerid,
-	    	"author.employeeid" : author.employeeid,
-    		"author.registration_id": author.registration_id,
+	   		// "author.email" : author.email,
+	   		// "author.firstname" : author.firstname,
+	    	// "author.lastname" : author.lastname,
+	    	// "author.primaryphone":author.primaryphone,
+	    	// "author.employerid" : author.employerid,
+	    	// "author.employeeid" : author.employeeid,
+    		// "author.registration_id": author.registration_id,
     		"messagePayload.messageType":messagePayload.messageType,
     		"messagePayload.message":messagePayload.message,
-	    	// 'messagePayload.receiver.email' : messagePayload.receiver.email,
-	    	// 'messagePayload.receiver.firstname' : messagePayload.receiver.firstname,
-	    	// 'messagePayload.receiver.lastname' : messagePayload.receiver.lastname,
-	    	// 'messagePayload.receiver.primaryphone':messagePayload.receiver.primaryphone,
-	    	// 'messagePayload.receiver.employerid' : messagePayload.receiver.employerid,
-	    	// 'messagePayload.receiver.employeeid' : messagePayload.receiver.employeeid,
-	    	// 'messagePayload.receiver.registration_id' : messagePayload.receiver.registration_id,
-	    	// 'messagePayload.receiver.read' : messagePayload.receiver.read,
-	    	// 'messagePayload.receiver.delivered' : messagePayload.receiver.delivered,
-	    	// 'messagePayload.receiver.last_seen' : messagePayload.receiver.last_seen
+	    	'messagePayload.receiver.email' : messagePayload.receiver.email,
+	    	'messagePayload.receiver.firstname' : messagePayload.receiver.firstname,
+	    	'messagePayload.receiver.lastname' : messagePayload.receiver.lastname,
+	    	'messagePayload.receiver.primaryphone':messagePayload.receiver.primaryphone,
+	    	'messagePayload.receiver.employerid' : messagePayload.receiver.employerid,
+	    	'messagePayload.receiver.employeeid' : messagePayload.receiver.employeeid
+	    	//'messagePayload.receiver.registration_id' : messagePayload.receiver.registration_id,
+	    	//'messagePayload.receiver.read' : messagePayload.receiver.read,
+	    	//'messagePayload.receiver.delivered' : messagePayload.receiver.delivered,
+	    	//'messagePayload.receiver.last_seen' : messagePayload.receiver.last_seen
 	   		}
 	   	}
 	   	var registrationToken = messagePayload.receiver.registration_id;
+		//logger.info('registrationToken of  ' + messagePayload.receiver.email + 'is' + registrationToken)			
 
 		admin.messaging().sendToDevice(registrationToken, payload)
-		.then(function(response) {			
+		.then(function(response) {
+			logger.info('message successfully sent to ' + messagePayload.receiver.email + 'by' + author.email)			
 			resolve(response);
 		})
-		.catch(function(error) {			
+		.catch(function(error) {
+			logger.error('message failed sent to ' + messagePayload.receiver.email + 'by' + author.email)			
 			reject(error);
 		});
 	})	
