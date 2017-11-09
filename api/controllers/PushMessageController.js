@@ -109,17 +109,18 @@ pushMessage = function(chatId,author,messagePayload){
  //   		}
 
 //var str = "{"+ "\"type\":2,\"messagePayload.receiver.lastname\":"+messagePayload.receiver.lastname+", \"messagePayload.receiver.firstname\":"+messagePayload.receiver.firstname+", \"chatId\":"+chatId+", \"messagePayload.messageType\":"+messagePayload.messageType+", \"messagePayload.receiver.employeeid\":"+messagePayload.receiver.employeeid+", \"messagePayload.receiver.employerid\":"+messagePayload.receiver.employerid+", \"messagePayload.receiver.email\":"+messagePayload.receiver.email+", \"messagePayload.receiver.primaryphone\":"+messagePayload.receiver.primaryphone+", \"messagePayload.message\":"+messagePayload.message+"" + "}";
-// var str = "{"+ "\"type\":"+ '"' + "chat" + '"'  + ",\"messagePayload.receiver.lastname\":"+ '"' + messagePayload.receiver.lastname + '"'  + ", \"messagePayload.receiver.firstname\":"+ '"' +messagePayload.receiver.firstname + '"'  + ", \"chatId\":"+ '"' +chatId + '"'  + " , \"messagePayload.messageType\":"+ '"' +messagePayload.messageType + '"'  + " , \"messagePayload.receiver.employeeid\":"+ '"' +messagePayload.receiver.employeeid + '"'  + ", \"messagePayload.receiver.employerid\":"+ '"' +messagePayload.receiver.employerid + '"'  + ", \"messagePayload.receiver.email\":"+ '"' +messagePayload.receiver.email+ '"'  + ", \"messagePayload.receiver.primaryphone\":"+ '"' +messagePayload.receiver.primaryphone+ '"'  + ", \"messagePayload.message\":"+ '"' +messagePayload.message + '"'+"" + "}";
 
-var str1 = "efseesd";
+var message = "{"+ "\"type\":"+ '"' + "chat" + '"'  + ",\"messagePayload.receiver.lastname\":"+ '"' + messagePayload.receiver.lastname + '"'  + ", \"messagePayload.receiver.firstname\":"+ '"' +messagePayload.receiver.firstname + '"'  + ", \"chatId\":"+ '"' +chatId + '"'  + " , \"messagePayload.messageType\":"+ '"' +messagePayload.messageType + '"'  + " , \"messagePayload.receiver.employeeid\":"+ '"' +messagePayload.receiver.employeeid + '"'  + ", \"messagePayload.receiver.employerid\":"+ '"' +messagePayload.receiver.employerid + '"'  + ", \"messagePayload.receiver.email\":"+ '"' +messagePayload.receiver.email+ '"'  + ", \"messagePayload.receiver.primaryphone\":"+ '"' +messagePayload.receiver.primaryphone+ '"'  + ", \"messagePayload.message\":"+ '"' +messagePayload.message + '"'+"" + "}";
 
- var str = "{"+ "\"type\":"+ '"' + "chat" + '"'  + ",\"messagePayload.receiver.lastname\":"+ '"' + messagePayload.receiver.lastname + '"'  + ", \"messagePayload.receiver.firstname\":"+ '"' +messagePayload.receiver.firstname + '"'  + ", \"chatId\":"+ '"' +chatId + '"'  + " , \"messagePayload.messageType\":"+ '"' +messagePayload.messageType + '"'  + " , \"messagePayload.receiver.employeeid\":"+ '"' +messagePayload.receiver.employeeid + '"'  + ", \"messagePayload.receiver.employerid\":"+ '"' +messagePayload.receiver.employerid + '"'  + ", \"messagePayload.receiver.email\":"+ '"' +messagePayload.receiver.email+ '"'  + ", \"messagePayload.receiver.primaryphone\":"+ '"' +messagePayload.receiver.primaryphone+ '"'  + ", \"messagePayload.message\":"+ '"' +messagePayload.message + '"'+"" + "}" + '"';
+//var str1 = "efseesd";
+
+ //var str = "{"+ "\"type\":"+ '"' + "chat" + '"'  + ",\"messagePayload.receiver.lastname\":"+ '"' + messagePayload.receiver.lastname + '"'  + ", \"messagePayload.receiver.firstname\":"+ '"' +messagePayload.receiver.firstname + '"'  + ", \"chatId\":"+ '"' +chatId + '"'  + " , \"messagePayload.messageType\":"+ '"' +messagePayload.messageType + '"'  + " , \"messagePayload.receiver.employeeid\":"+ '"' +messagePayload.receiver.employeeid + '"'  + ", \"messagePayload.receiver.employerid\":"+ '"' +messagePayload.receiver.employerid + '"'  + ", \"messagePayload.receiver.email\":"+ '"' +messagePayload.receiver.email+ '"'  + ", \"messagePayload.receiver.primaryphone\":"+ '"' +messagePayload.receiver.primaryphone+ '"'  + ", \"messagePayload.message\":"+ '"' +messagePayload.message + '"'+"" + "}" + '"';
 
  //+ "}"
 // "{"+
  		var payload = {
  			data:{
- 				message:str
+ 				message:message
  			}
  		}
 	   	// var payload = {
