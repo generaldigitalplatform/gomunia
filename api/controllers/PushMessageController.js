@@ -107,9 +107,13 @@ pushMessage = function(chatId,author,messagePayload){
  //    		registration_id : req.body.messagePayload.receiver.registration_id,
  //    		message : req.body.messagePayload.message   	
  //   		}
-  
- var str = "{"+ "\"type\":2,\"messagePayload.receiver.lastname\":"+messagePayload.receiver.lastname+", \"messagePayload.receiver.firstname\":"+messagePayload.receiver.firstname+", \"chatId\":"+chatId+", \"messagePayload.messageType\":"+messagePayload.messageType+", \"messagePayload.receiver.employeeid\":"+messagePayload.receiver.employeeid+", \"messagePayload.receiver.employerid\":"+messagePayload.receiver.employerid+", \"messagePayload.receiver.email\":"+messagePayload.receiver.email+", \"messagePayload.receiver.primaryphone\":"+messagePayload.receiver.primaryphone+", \"messagePayload.message\":"+messagePayload.message+"" + "}";
 
+//var str = "{"+ "\"type\":2,\"messagePayload.receiver.lastname\":"+messagePayload.receiver.lastname+", \"messagePayload.receiver.firstname\":"+messagePayload.receiver.firstname+", \"chatId\":"+chatId+", \"messagePayload.messageType\":"+messagePayload.messageType+", \"messagePayload.receiver.employeeid\":"+messagePayload.receiver.employeeid+", \"messagePayload.receiver.employerid\":"+messagePayload.receiver.employerid+", \"messagePayload.receiver.email\":"+messagePayload.receiver.email+", \"messagePayload.receiver.primaryphone\":"+messagePayload.receiver.primaryphone+", \"messagePayload.message\":"+messagePayload.message+"" + "}";
+
+ var str = "{"+ "\"type\":"+ '"' + "chat" + '"'  + ",\"messagePayload.receiver.lastname\":"+ '"' + messagePayload.receiver.lastname + '"'  + ", \"messagePayload.receiver.firstname\":"+ '"' +messagePayload.receiver.firstname + '"'  + ", \"chatId\":"+ '"' +chatId + '"'  + " , \"messagePayload.messageType\":"+ '"' +messagePayload.messageType + '"'  + " , \"messagePayload.receiver.employeeid\":"+ '"' +messagePayload.receiver.employeeid + '"'  + ", \"messagePayload.receiver.employerid\":"+ '"' +messagePayload.receiver.employerid + '"'  + ", \"messagePayload.receiver.email\":"+ '"' +messagePayload.receiver.email+ '"'  + ", \"messagePayload.receiver.primaryphone\":"+ '"' +messagePayload.receiver.primaryphone+ '"'  + ", \"messagePayload.message\":"+ '"' +messagePayload.message +"" + "}";
+
+ //+ "}"
+// "{"+
  		var payload = {
  			data:{
  				message:str
