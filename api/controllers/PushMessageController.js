@@ -853,7 +853,31 @@ exports.saveFCMregistrationToken = function(req,res){
 			if (err) return res.send(err);;
 			if(profile)
 			{
-				return res.json(profile);
+				chatProfile = [];
+
+				var query_find_authorreg_id = {"createdBy.email":req.body.UserId}
+				var query_find_receiverreg_id = {"member.email":req.body.UserId}
+
+				chatModel.update(query_find_authorreg_id,{$set:{"createdBy.registration_id":req.body.FCMregistrationToken}},function(err,profile){
+					if(err){
+						//console.log('error')
+					}
+					if(profile){
+						//console.log('profiles updated' + profile)
+					}
+			})
+
+				chatModel.update(query_find_receiverreg_id,{$set:{"member.registration_id":req.body.FCMregistrationToken}},function(err,profile){
+				if(err){
+					//console.log('error')
+				}
+				if(profile){
+					//console.log('profiles updated' + profile)
+				}
+			})
+
+			return res.json(profile);
+			
 			}
 		});		
 	}else
