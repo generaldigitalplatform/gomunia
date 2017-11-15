@@ -214,14 +214,14 @@ exports.findJobStatusById = function(req,res){
     	jobStatusCount = [jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":3,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  							  jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":4,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  							  jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":5,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
- 							  // jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":6,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
+ 							  jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":6,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  					          jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"createdAt":{$gte:gteQuery,$lte:lteQuery}}))
  					          ];
  		}else{
  		jobStatusCount = [jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":3,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  							  jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":4,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  							  jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":5,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
- 							  // jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":6,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
+ 							  jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":6,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  					          jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"createdAt":{$gte:gteQuery,$lte:lteQuery}}))
  					          ];
  		}
@@ -233,7 +233,7 @@ exports.findJobStatusById = function(req,res){
  			   	 	if( key === "0") pendingJobsCount = result[key];
  			   	 	if( key === "1") completedJobsCount = result[key];
  			   	 	if( key === "2") cancelledJobsCount = result[key];
- 			   	 	// if( key === "3") rescheduledJobsCount = result[key];
+ 			   	 	if( key === "3") rescheduledJobsCount = result[key];
  			   	 	if( key === "4") totalJobsCount = result[key];	
  			   	 }
  			   })
@@ -258,7 +258,7 @@ exports.findJobStatusById = function(req,res){
  		var jobStatusCount = [jobModel.count(({"EmployeeDetails.EmployerId":employerid,"JobStatus":3,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  							  jobModel.count(({"EmployeeDetails.EmployerId":employerid,"JobStatus":4,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  							  jobModel.count(({"EmployeeDetails.EmployerId":employerid,"JobStatus":5,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
- 							  // jobModel.count(({"EmployeeDetails.EmployerId":employerid,"JobStatus":6,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
+ 							  jobModel.count(({"EmployeeDetails.EmployerId":employerid,"JobStatus":6,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  					          jobModel.count(({"EmployeeDetails.EmployerId":employerid,"createdAt":{$gte:gteQuery,$lte:lteQuery}}))
  					          ];
  		
@@ -268,7 +268,7 @@ exports.findJobStatusById = function(req,res){
  			   	 	if( key === "0") pendingJobsCount = result[key];
  			   	 	if( key === "1") completedJobsCount = result[key];
  			   	 	if( key === "2") cancelledJobsCount = result[key];
- 			   	 	// if( key === "3") rescheduledJobsCount = result[key];
+ 			   	 	if( key === "3") rescheduledJobsCount = result[key];
  			   	 	if( key === "4") totalJobsCount = result[key];	
  			   	 }
  			   })
