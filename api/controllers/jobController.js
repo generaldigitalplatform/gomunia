@@ -245,7 +245,7 @@ exports.findJobStatusById = function(req,res){
  			   	res.send({ 		//	   					"starttime":funstarttime,
 								"totalJobs":totalJobsCount,
 								"completedJobs":completedJobsCount,
-								"pendingJobs":pendingJobsCount,
+								"openJobs":pendingJobsCount,
 								// "rescheduledJobs":rescheduledJobsCount,
 								"cancelledJobs":cancelledJobsCount
 								//,"endtimeInMilliSecs":funendtime
@@ -281,7 +281,7 @@ exports.findJobStatusById = function(req,res){
  			   					//"starttime":funstarttime,
 								"totalJobs":totalJobsCount,
 								"completedJobs":completedJobsCount,
-								"pendingJobs":pendingJobsCount,
+								"openJobs":pendingJobsCount,
 								// "rescheduledJobs":rescheduledJobsCount,
 								"cancelledJobs":cancelledJobsCount
 								//"endtimeInMilliSecs":funendtime
