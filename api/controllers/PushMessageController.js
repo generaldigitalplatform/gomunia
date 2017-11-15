@@ -596,7 +596,7 @@ checkIfChatCreated = function(createdBy,member){
 		var memberbyQuery = {$and: [{"member.email":createdBy.email},{"createdBy.email":member.email}]}
 
 		var responseCount = 0;
-		//var memObj = [];
+		var chatCreatedByMember = [];
 
 	   // async.eachSeries(queryies,function(query,callback) {
         chatModel.find(createdbyQuery, function (err, response) {
@@ -604,17 +604,17 @@ checkIfChatCreated = function(createdBy,member){
 		   // registration_ids.push(response[0].FCMregistrationToken); 	       
 		    if(response.length !== 0){
 		    //	memObj.push(response);
-		    	resolve(response[0]);
-		    }else{
-		    	chatModel.find(memberbyQuery, function (err, response) {
+		    	chatCreatedByMember.push(response[0]);
+		    }//else{
+	    	chatModel.find(memberbyQuery, function (err, response) {
 
-		    	if(response.length !== 0){
-			    	resolve(response[0]);
-			    }else{
-			    	resolve(response);
-			    }
-		    	})
-		    }
+	    	if(response.length !== 0){
+		    	chatCreatedByMember.push(response[0]);
+		    }//else{
+		    	resolve(chatCreatedByMember);
+		   //}
+	    	})
+		  //  }
 		    // responseCount++;
 		    // if (responseCount === Object.keys(queryies).length)
 	     //    {
@@ -648,7 +648,7 @@ exports.createChat = function(req,res){
   	if(chatprofile.length !== 0){
   		//chatProfile = checkWhoIscreatedAndWhoIsMember(chatprofile[0],createdBy,member)
   		//.then(function(chatProfile){
-  			res.status(200).send(chatprofile).end();
+  			res.status(200).send(chatprofile[0]).end();
   	//	})
   	}else{
    buildChatObject(createdBy,member)
