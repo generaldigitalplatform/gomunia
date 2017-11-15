@@ -781,54 +781,60 @@ exports.findMessagesByChatId = function(req,res){
     var fromDate;
     var startTime = "T00:00:00.000Z";
     var toTime = "T23:59:00.000Z";;
-    var messageDates = req.query.messageDates;
-
-    if(messageDates === '0') {
-      gteQuery = moment(new Date()).format("YYYY-MM-DD")+startTime;
-      lteQuery = moment(new Date()).format("YYYY-MM-DD")+toTime;
-      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
-    }
-    else if(messageDates === '1') {
+    //var messageDates = req.query.messageDates;
+    var limit = Number(req.query.limit);
+    var skip = Number(req.query.skip);
     
-      var today = new Date();
-      var yesterday = new Date(today);
-      yesterday.setDate(today.getDate()-1);
+   // gteQuery = moment(new Date()).format("YYYY-MM-DD")+startTime;
+   // lteQuery = moment(new Date()).format("YYYY-MM-DD")+toTime;
+    //query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
 
-      gteQuery = moment(yesterday).format("YYYY-MM-DD")+startTime;
-      lteQuery = moment(yesterday).format("YYYY-MM-DD")+toTime;
-
-      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
-    }
-    else if(messageDates === '2') {  
-
-      gteQuery = moment().startOf('isoweek').format("YYYY-MM-DD")+startTime;
-      lteQuery =  moment().endOf('isoweek').format("YYYY-MM-DD")+toTime;
-      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
-    }
-    else if(messageDates === '3') {  
-
-      gteQuery = moment().subtract(1, 'weeks').startOf('isoweek').format("YYYY-MM-DD")+startTime;
-      lteQuery =  moment().subtract(1, 'weeks').endOf('isoweek').format("YYYY-MM-DD")+toTime;
-      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
-    }
-    else if(messageDates === '4') {
+    // if(messageDates === '0') {
+    //   gteQuery = moment(new Date()).format("YYYY-MM-DD")+startTime;
+    //   lteQuery = moment(new Date()).format("YYYY-MM-DD")+toTime;
+    //   query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    // }
+    // else if(messageDates === '1') {
     
-      gteQuery = moment().startOf('month').format("YYYY-MM-DD")+startTime;
-            lteQuery   = moment().endOf('month').format("YYYY-MM-DD")+toTime;  
-      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
-    }
-    else if(messageDates === '5') {
+    //   var today = new Date();
+    //   var yesterday = new Date(today);
+    //   yesterday.setDate(today.getDate()-1);
 
-      gteQuery = moment().subtract(1, 'months').startOf('month').format("YYYY-MM-DD")+startTime;
-      lteQuery = moment().subtract(1, 'months').endOf('month').format("YYYY-MM-DD")+toTime;
-      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
-    }
-    else if(messageDates === '6') {
+    //   gteQuery = moment(yesterday).format("YYYY-MM-DD")+startTime;
+    //   lteQuery = moment(yesterday).format("YYYY-MM-DD")+toTime;
 
-      gteQuery = moment().startOf('year').format("YYYY-MM-DD")+startTime;
-          lteQuery   = moment().endOf('year').format("YYYY-MM-DD")+toTime; 
-      query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
-    }
+    //   query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    // }
+    // else if(messageDates === '2') {  
+
+    //   gteQuery = moment().startOf('isoweek').format("YYYY-MM-DD")+startTime;
+    //   lteQuery =  moment().endOf('isoweek').format("YYYY-MM-DD")+toTime;
+    //   query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    // }
+    // else if(messageDates === '3') {  
+
+    //   gteQuery = moment().subtract(1, 'weeks').startOf('isoweek').format("YYYY-MM-DD")+startTime;
+    //   lteQuery =  moment().subtract(1, 'weeks').endOf('isoweek').format("YYYY-MM-DD")+toTime;
+    //   query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    // }
+    // else if(messageDates === '4') {
+    
+    //   gteQuery = moment().startOf('month').format("YYYY-MM-DD")+startTime;
+    //         lteQuery   = moment().endOf('month').format("YYYY-MM-DD")+toTime;  
+    //   query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    // }
+    // else if(messageDates === '5') {
+
+    //   gteQuery = moment().subtract(1, 'months').startOf('month').format("YYYY-MM-DD")+startTime;
+    //   lteQuery = moment().subtract(1, 'months').endOf('month').format("YYYY-MM-DD")+toTime;
+    //   query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    // }
+    // else if(messageDates === '6') {
+
+    //   gteQuery = moment().startOf('year').format("YYYY-MM-DD")+startTime;
+    //       lteQuery   = moment().endOf('year').format("YYYY-MM-DD")+toTime; 
+    //   query["createdAt"] = {$gte:gteQuery,$lte:lteQuery}
+    // }
 
     messageModel.find(query,function(err,chatprofile){
         if(err) {
@@ -836,7 +842,7 @@ exports.findMessagesByChatId = function(req,res){
              return res.send(err);
          }          
           res.json(chatprofile);
-        }).sort({ createdAt : -1});
+        }).sort({ createdAt : -1}).limit(limit).skip(skip);
 };
 exports.saveFCMregistrationToken = function(req,res){
 	res.header("Access-Control-Allow-Origin", "*");
