@@ -26,18 +26,18 @@ exports.findAllJobs = function(req,res){
 	// var jobId = req.query.JobId;
 
 
-	var empId = req.param('EmpId');
-	var employerId = req.param('employerid');
-	var jobDates = req.param('JobDates');
-	var jobStatus = req.param('JobStatus');
-	var fieldForce = req.param('FieldExecutive');
-	var customer = req.param('Customer');
-	var phone = req.param('Phone');
-	var jobId = req.param('JobId');
+	var empId = req.query.EmpId;
+	var employerId = req.query.employerid;
+	var jobDates = req.query.JobDates;
+	var jobStatus = req.query.JobStatus;
+	var fieldForce = req.query.FieldExecutive;
+	var customer = req.query.Customer;
+	var phone = req.query.Phone;
+	var jobId = req.query.JobId;
 
 	var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-	var jobTitle = req.param('JobTitle');
-	var jobDescription = req.param('JobDescription');
+	var jobTitle = req.query.JobTitle;
+	var jobDescription = req.query.JobDescription;
 	if(employerId && employerId.length !== 0) {
 		query["EmployeeDetails.EmployerId"] = employerId;
 	}
@@ -47,7 +47,7 @@ exports.findAllJobs = function(req,res){
 		if(req.query.hasOwnProperty('JobStatus')){
 			if(req.query.JobStatus.match("NotCompleted") && req.query.JobStatus.match("NotCancelled")){
 				query = {$and: [{"JobStatus":{$ne: 4 }},{"JobStatus":{ $ne: 5 }}]};
-				query["EmployeeDetails.EmployeeId"] = req.params.Id;
+				query["EmployeeDetails.EmployeeId"] = req.query.Id;
 		   	}
 				
 		}
@@ -192,7 +192,7 @@ exports.findJobStatusById = function(req,res){
 	var allocatedJobsCount = 0;
 	var lteQuery;
 	var gteQuery;
-	var employerid = req.param("employerid");
+	var employerid = req.query.employerid;
 
 	//var todayQuery = {"createdAt" : new ISODate(req.Today)};
 	gteQuery = new Date(req.body.fromDate).toISOString();
@@ -208,20 +208,20 @@ exports.findJobStatusById = function(req,res){
  //    "JobStatus":6 // rescheduled
  //    "JobStatus":5 // cancelled
     if(req.body.hasOwnProperty('employeeid')){
-    	// var funstarttime = new Date();
+    	// var funstarttime = new Date(); JobStatus -3 : OPEN, 4: Completed, 5 : Cancelled
     	var jobStatusCount;
     	if(employerid){
     	jobStatusCount = [jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":3,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  							  jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":4,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  							  jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":5,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
- 							  jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":6,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
+ 							  // jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":6,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  					          jobModel.count(({"EmployeeDetails.EmployerId":employerid,"EmployeeDetails.EmployeeId":req.body.employeeid,"createdAt":{$gte:gteQuery,$lte:lteQuery}}))
  					          ];
  		}else{
  		jobStatusCount = [jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":3,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  							  jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":4,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  							  jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":5,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
- 							  jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":6,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
+ 							  // jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"JobStatus":6,"createdAt":{$gte:gteQuery,$lte:lteQuery}})),
  					          jobModel.count(({"EmployeeDetails.EmployeeId":req.body.employeeid,"createdAt":{$gte:gteQuery,$lte:lteQuery}}))
  					          ];
  		}
