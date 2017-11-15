@@ -864,7 +864,7 @@ exports.saveFCMregistrationToken = function(req,res){
 				var query_find_authorreg_id = {"createdBy.email":req.body.UserId}
 				var query_find_receiverreg_id = {"member.email":req.body.UserId}
 
-				chatModel.update(query_find_authorreg_id,{$set:{"createdBy.registration_id":req.body.FCMregistrationToken}},function(err,profile){
+				chatModel.updateMany(query_find_authorreg_id,{$set:{"createdBy.registration_id":req.body.FCMregistrationToken}},function(err,profile){
 					if(err){
 						//console.log('error')
 					}
@@ -873,7 +873,7 @@ exports.saveFCMregistrationToken = function(req,res){
 					}
 			})
 
-				chatModel.update(query_find_receiverreg_id,{$set:{"member.registration_id":req.body.FCMregistrationToken}},function(err,profile){
+				chatModel.updateMany(query_find_receiverreg_id,{$set:{"member.registration_id":req.body.FCMregistrationToken}},function(err,profile){
 				if(err){
 					//console.log('error')
 				}
