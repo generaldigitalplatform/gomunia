@@ -81,7 +81,7 @@ uploadImageOnGoogleStorage = function(img_filename,imgdata){
 
 	})
 }
-pushMessage = function(chatId,author,messagePayload){
+pushMessage = function(createdAt,chatId,author,messagePayload){
 	return new Promise(function(resolve,reject){
 		// var payload = {
 		//   data: {
@@ -108,9 +108,9 @@ pushMessage = function(chatId,author,messagePayload){
  //    		message : req.body.messagePayload.message   	
  //   		}
 
-//var str = "{"+ "\"type\":2,\"messagePayload.receiver.lastname\":"+messagePayload.receiver.lastname+", \"messagePayload.receiver.firstname\":"+messagePayload.receiver.firstname+", \"chatId\":"+chatId+", \"messagePayload.messageType\":"+messagePayload.messageType+", \"messagePayload.receiver.employeeid\":"+messagePayload.receiver.employeeid+", \"messagePayload.receiver.employerid\":"+messagePayload.receiver.employerid+", \"messagePayload.receiver.email\":"+messagePayload.receiver.email+", \"messagePayload.receiver.primaryphone\":"+messagePayload.receiver.primaryphone+", \"messagePayload.message\":"+messagePayload.message+"" + "}";
+var message = "{"+ "\"type\":"+ '"' + "chat" + '"'  + ",\"createdAt\":"+ '"' + createdAt + '"' + ",\"author.lastname\":"+ '"' + author.lastname + '"'  + ", \"author.firstname\":"+ '"' +author.firstname + '"'  + ", \"chatId\":"+ '"' +chatId + '"'  + " , \"messagePayload.messageType\":"+ '"' +messagePayload.messageType + '"'  + " , \"author.employeeid\":"+ '"' +author.employeeid + '"'  + ", \"author.employerid\":"+ '"' +author.employerid + '"'  + ", \"author.email\":"+ '"' +author.email+ '"'  + ", \"author.primaryphone\":"+ '"' +author.primaryphone+ '"'  + ", \"messagePayload.message\":"+ '"' +messagePayload.message + '"'+"" + "}";
 
-var message = "{"+ "\"type\":"+ '"' + "chat" + '"'  + ",\"author.lastname\":"+ '"' + author.lastname + '"'  + ", \"author.firstname\":"+ '"' +author.firstname + '"'  + ", \"chatId\":"+ '"' +chatId + '"'  + " , \"messagePayload.messageType\":"+ '"' +messagePayload.messageType + '"'  + " , \"author.employeeid\":"+ '"' +author.employeeid + '"'  + ", \"author.employerid\":"+ '"' +author.employerid + '"'  + ", \"author.email\":"+ '"' +author.email+ '"'  + ", \"author.primaryphone\":"+ '"' +author.primaryphone+ '"'  + ", \"messagePayload.message\":"+ '"' +messagePayload.message + '"'+"" + "}";
+//var message = "{"+ "\"type\":"+ '"' + "chat" + '"'  + ",\"author.lastname\":"+ '"' + author.lastname + '"'  + ", \"author.firstname\":"+ '"' +author.firstname + '"'  + ", \"chatId\":"+ '"' +chatId + '"'  + " , \"messagePayload.messageType\":"+ '"' +messagePayload.messageType + '"'  + " , \"author.employeeid\":"+ '"' +author.employeeid + '"'  + ", \"author.employerid\":"+ '"' +author.employerid + '"'  + ", \"author.email\":"+ '"' +author.email+ '"'  + ", \"author.primaryphone\":"+ '"' +author.primaryphone+ '"'  + ", \"messagePayload.message\":"+ '"' +messagePayload.message + '"'+"" + "}";
 
 //var str1 = "efseesd";
 
@@ -770,8 +770,6 @@ exports.findChatMembers = function(req,res){
 	});
 }; 
 exports.findMessagesByChatId = function(req,res){
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
     var query = {"chatId":req.query.chatId}
 
@@ -939,6 +937,7 @@ exports.pushMessageToDevice = function(req,res){
 	});
 };
 exports.sendMessageToDevice = function(req,res){
+    var createdAt = new Date().toISOString();
     var chatId = req.body.chatId;
     var author = req.body.author;
     var messagePayload = req.body.messagePayload;
@@ -981,7 +980,7 @@ exports.sendMessageToDevice = function(req,res){
 	}
 	else{
 		if(messagePayload.messageType === 'text'){
-			Promise.all([saveMessageOnDb(chatId,author,messagePayload),pushMessage(chatId,author,messagePayload)])
+			Promise.all([saveMessageOnDb(chatId,author,messagePayload),pushMessage(createdAt,chatId,author,messagePayload)])
 			//Promise.all([saveMessageOnDb(chatId,author,messagePayload),pushMessage(messagePayload.receiver.registration_id,messagePayload.message)])
 			.then(([saveMessage,pushMessage]) =>{
 				logger.info('text message saved on db and pushed to device');
@@ -1019,7 +1018,7 @@ exports.sendMessageToDevice = function(req,res){
 							 // })])
 							 ])
 			 .then(function(message){
-               	pushMessage(chatId,author,messagePayload)
+               	pushMessage(createdAt,chatId,author,messagePayload)
 					.then(function(saveMessage){
 						logger.info('Image uploaded to server, saved on db and message pushed to device');
 						res.status(200).send(message[1]).end();
