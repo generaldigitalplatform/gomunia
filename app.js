@@ -33,6 +33,7 @@ var productOwnerRoute = require('./api/routes/productOwnerRoute');
 var jobRoute = require('./api/routes/jobRoute');
 var pushMessageRoute = require('./api/routes/PushMessageRoute');
 var googleMapsRoute = require('./api/routes/googleMaps');
+var salesRegRoute = require('./api/routes/salesRegRoute');
 var legalRoute = require('./api/routes/legalRoute');
 
 //var chatRoute = require('./api/routes/chatRoute');
@@ -51,6 +52,7 @@ employeeRoute(app);
 jobRoute(app);
 pushMessageRoute(app);
 googleMapsRoute(app);
+salesRegRoute(app);
 legalRoute(app);
 //chatRoute(app);
 //chatGroupRoute(app);
