@@ -1,6 +1,6 @@
 #add 'node_modules and logs' to .gitignore file
 
 git rm -r --cached node_modules
-git rm -r  logs
+git rm -r  --cached logs
 git commit -m 'Remove the now ignored directory node_modules and logs'
 git push heroku master

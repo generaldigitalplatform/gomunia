@@ -183,7 +183,7 @@ buildChatObject = function(createdBy,member){
       employerid: member.employerid,
       employeeid: member.employeeid,
     };
-
+    var isActive = false;
     var chatMembersObj = [createdByObj,memberObj];
 
     // FCMModel.findOne({"UserId":memberObj.email},function (error,response){ 
@@ -217,8 +217,10 @@ buildChatObject = function(createdBy,member){
 	        {	
 	       		regidObj['createdBy'] = createdByObj;
 	       		regidObj['member'] = memberObj;
+	       		regidObj['isActive'] = false;
+
 	        	//chatProfile.push(regidObj);
-	        	var resObj = {createdBy,member}
+	        	var resObj = {createdBy,member,isActive}
 	            resolve(resObj);  
 	        }
             callback(err)
@@ -640,6 +642,20 @@ checkIfChatCreated = function(createdBy,member){
 
   });
 }
+exports.closeChat = function(req,res){
+  var updateData = req.body;
+  var options ={upsert:true,new: true};
+  var query = {"_id":req.query.chatId};
+  
+  chatModel.findOneAndUpdate(query,{$set:updateData},options,function(err,profile){
+    if (err) return res.send(err);;
+    if(profile)
+    {
+      res.json(profile);
+    }
+  });
+
+}
 exports.createChat = function(req,res){
   var createdBy = req.body.createdBy;
   var member =  req.body.member;
@@ -686,7 +702,7 @@ exports.findChatMembers = function(req,res){
     };
     var response = [];
 
-	var query = {$or:[{"createdBy.employeeid":req.params.Id},{"member.employeeid":req.params.Id}]};
+	var query = {"isClosed":"false",$or:[{"createdBy.employeeid":req.params.Id},{"member.employeeid":req.params.Id}]};
     chatModel.find(query,function(err,chatprofiles){
 	    if(err) {
 	        logger.error(err)
@@ -714,45 +730,38 @@ exports.findChatMembers = function(req,res){
 					    	memObj.push(chatprofile);
 				    }
 				    responseCount++;
-				    if (responseCount === Object.keys(chatprofiles).length)
-			        {   			        	
-						if(memObj.length === 0){
-							res.status(200).send(memObj).end();
-						}
-			        	
-						else{
-
-							
-			        	var response = [];
-			        	// var member = [{
-			        	// 	"member":String,
-			        	// 	"createdBy":String,
-			        	// 	"message":String
-			        	// }];
-			        	//var chatList = [];  
-			           	for(var i=0; i< memObj.length; i++){
-			           		var chatObj = {
-							 "chatId":Object,
-			        		"member":{},
-			        		"createdBy":{},
-			        		"message":String
-			        	};
-			        		if(memObj[i].member.employeeid === req.params.Id ){
-			        			chatObj.chatId = memObj[i]._id;
-			        			chatObj.member = memObj[i]['createdBy'];
-			        			chatObj.createdBy = memObj[i]['member'];
-			        			chatObj.message = memObj[i]['message'];
-			        			response.push(chatObj);	 	 
-			        		}if(memObj[i].createdBy.employeeid === req.params.Id){
-			        			chatObj.chatId = memObj[i]._id;
-			        			chatObj.member = memObj[i]['member'];
-			        			chatObj.createdBy = memObj[i]['createdBy'];
-			        			chatObj.message = memObj[i]['message'];
-			        			response.push(chatObj);	 
-			        		}
-			        	}
-			            res.status(200).send(response).end();
-						}
+				    if (responseCount === Object.keys(chatprofiles).length){			     		        	
+    						if(memObj.length === 0){
+    							res.status(200).send(memObj).end();
+    						}
+    			        	
+    						else{    							
+    			        	var response = [];
+                     	for(var i=0; i< memObj.length; i++){
+        			          var chatObj = {
+        							  "chatId":Object,
+        			        	"member":{},
+        			        	"createdBy":{},
+        			        	"message":String
+        			        	};
+    			        		if(memObj[i].member.employeeid === req.params.Id ){
+    			        			chatObj.chatId = memObj[i]._id;
+    			        			chatObj.member = memObj[i]['createdBy'];
+    			        			chatObj.createdBy = memObj[i]['member'];
+    			        			chatObj.message = memObj[i]['message'];
+                        chatObj.isClosed = memObj[i].isClosed;
+    			        			response.push(chatObj);	 	 
+    			        		}if(memObj[i].createdBy.employeeid === req.params.Id){
+    			        			chatObj.chatId = memObj[i]._id;
+    			        			chatObj.member = memObj[i]['member'];
+    			        			chatObj.createdBy = memObj[i]['createdBy'];
+    			        			chatObj.message = memObj[i]['message'];
+                        chatObj.isClosed = memObj[i].isClosed;
+    			        			response.push(chatObj);	 
+    			        		}
+    			        	}
+    			          res.status(200).send(response).end();
+    						}
 			  
 			        }
 			      	 callback(err);
