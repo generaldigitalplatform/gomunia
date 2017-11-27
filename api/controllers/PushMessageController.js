@@ -642,16 +642,17 @@ checkIfChatCreated = function(createdBy,member){
 
   });
 }
-exports.closeChat = function(req,res){
-  var updateData = req.body;
-  var options ={upsert:true,new: true};
-  var query = {"_id":req.query.chatId};
+exports.deleteChat = function(req,res){
+
+  var query = {"_id":req.params.Id};
   
-  chatModel.findOneAndUpdate(query,{$set:updateData},options,function(err,profile){
+  chatModel.findOneAndRemove(query,function(err,profile){
     if (err) return res.send(err);;
     if(profile)
     {
       res.json(profile);
+    }else{
+      res.json({});
     }
   });
 
@@ -702,7 +703,7 @@ exports.findChatMembers = function(req,res){
     };
     var response = [];
 
-	var query = {"isClosed":"false",$or:[{"createdBy.employeeid":req.params.Id},{"member.employeeid":req.params.Id}]};
+	var query = {$or:[{"createdBy.employeeid":req.params.Id},{"member.employeeid":req.params.Id}]};
     chatModel.find(query,function(err,chatprofiles){
 	    if(err) {
 	        logger.error(err)
@@ -749,14 +750,12 @@ exports.findChatMembers = function(req,res){
     			        			chatObj.member = memObj[i]['createdBy'];
     			        			chatObj.createdBy = memObj[i]['member'];
     			        			chatObj.message = memObj[i]['message'];
-                        chatObj.isClosed = memObj[i].isClosed;
     			        			response.push(chatObj);	 	 
     			        		}if(memObj[i].createdBy.employeeid === req.params.Id){
     			        			chatObj.chatId = memObj[i]._id;
     			        			chatObj.member = memObj[i]['member'];
     			        			chatObj.createdBy = memObj[i]['createdBy'];
     			        			chatObj.message = memObj[i]['message'];
-                        chatObj.isClosed = memObj[i].isClosed;
     			        			response.push(chatObj);	 
     			        		}
     			        	}

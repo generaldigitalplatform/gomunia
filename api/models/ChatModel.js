@@ -23,7 +23,6 @@ var ChatSchema = new Schema({
     	  employerid:String,
     	  employeeid:String,
     	  registration_id:String
-       },
-    isClosed:Boolean
+       }
 },{timestamps:true},{"strict":false})
 module.exports = mongoose.model('Chat',ChatSchema);
