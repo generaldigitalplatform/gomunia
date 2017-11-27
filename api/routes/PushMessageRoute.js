@@ -13,7 +13,7 @@ module.exports = function(app){
  pushMessageRoute.post('/regtoken',pushMessageController.saveFCMregistrationToken);
  pushMessageRoute.post('/chat/send',pushMessageController.sendMessageToDevice);
  pushMessageRoute.post('/chat/create',pushMessageController.createChat);
- pushMessageRoute.post('/chat/close',pushMessageController.closeChat);
+ pushMessageRoute.delete('/chat/:Id',pushMessageController.deleteChat);
  pushMessageRoute.get('/chat',pushMessageController.findMessagesByChatId);
  pushMessageRoute.get('/chat/:Id',pushMessageController.findChatMembers);
  pushMessageRoute.post('/chatgroup/create',pushMessageController.createChatGroup);
