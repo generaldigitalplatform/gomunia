@@ -5,6 +5,27 @@ var mongoose = require('mongoose'),
 	moment= require('moment'),
 	promise = require('bluebird');
 
+TaskIdGenerator =  function () {
+     
+    this.length = 6;
+    this.timestamp = +new Date;
+
+    var getRandomInt = function( min, max ) {
+    return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
+    }
+
+    var ts = this.timestamp.toString();
+    var parts = ts.split( "" ).reverse();
+    var id = "";
+
+    for( var i = 0; i < this.length; ++i ) {
+    var index = getRandomInt( 0, parts.length - 1 );
+    id += parts[index];  
+    }     
+    return id;  
+}
+
+
 exports.findAllJobs = function(req,res){
 	res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -291,8 +312,8 @@ exports.findJobStatusById = function(req,res){
    
 };
 exports.createNewJob = function(req,res){
-	res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	var jobId = TaskIdGenerator();
+	req.body.JobId = jobId;
 	var newJob = new jobModel(req.body);
 	newJob.save(function(err, profile){	
 	if(err)

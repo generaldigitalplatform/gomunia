@@ -660,6 +660,7 @@ exports.deleteChat = function(req,res){
 exports.createChat = function(req,res){
   var createdBy = req.body.createdBy;
   var member =  req.body.member;
+
   checkIfChatCreated(createdBy,member)
   .then(function(chatprofile){
   	if(chatprofile.length !== 0){
@@ -1137,14 +1138,19 @@ exports.addUsersToChatGroup = function(req,res){
 } 
 exports.removeUsersFromChatGroup = function(req,res){
   
-   // var createdBy = req.body.createdBy;
-  	var members =  req.body.members;
+   var memRegIds = req.body.members;
+   var registration_ids = [];
+   
+   for(var i=0; i<memRegIds.length;i++){
+    registration_ids.push(memRegIds[i])
+   }
+ // var registration_ids =  req.body.members;
 	var chatGroupName = req.body.chatGroupName;
 	var chatGroupNotification_key = req.body.chatGroupKey;
 
-    getDeviceRegistrationIdsOnDb(members)
+ //   getDeviceRegistrationIdsOnDb(members)
     // buildChatGroupObject(createdBy,members,chatGroupName)
-    .then(function(registration_ids){           
+  //  .then(function(registration_ids){           
         // getGroupChatProfileByChatGroupName(chatGroupName)
         //.then(function(chatGroup){
            // var chatGroupNotification_key = chatGroup.chatGroupKey;
@@ -1160,10 +1166,10 @@ exports.removeUsersFromChatGroup = function(req,res){
                 logger.error(error);
                 res.json({error:error});
             });
-        }) 
-        .catch(function(error){
-            logger.error(error);
-            res.json({error:error});
-        });
+    //    }) 
+        // .catch(function(error){
+        //     logger.error(error);
+        //     res.json({error:error});
+        // });
    // });
 }     

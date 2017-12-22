@@ -35,6 +35,7 @@ var pushMessageRoute = require('./api/routes/PushMessageRoute');
 var googleMapsRoute = require('./api/routes/googleMaps');
 var salesRegRoute = require('./api/routes/salesRegRoute');
 var legalRoute = require('./api/routes/legalRoute');
+var licenseRoute = require('./api/routes/LicenseRoute');
 
 //var chatRoute = require('./api/routes/chatRoute');
 //var chatGroupRoute = require('./api/routes/chatGroupRoute');
@@ -54,6 +55,7 @@ pushMessageRoute(app);
 googleMapsRoute(app);
 salesRegRoute(app);
 legalRoute(app);
+licenseRoute(app);
 //chatRoute(app);
 //chatGroupRoute(app);
 

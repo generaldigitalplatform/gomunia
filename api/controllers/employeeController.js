@@ -31,7 +31,7 @@ exports.findEmployeeById = function(req,res){
 			if(err) return res.send(err);
 			res.json(profile);
 		});
-	};
+};
 exports.resetEmployeePassword = function(req,res){
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
