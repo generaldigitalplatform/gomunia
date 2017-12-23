@@ -5,16 +5,16 @@ var SchemaTypes = mongoose.Schema.Types;
 var JobSchema = new Schema({
 	JobDates:String,
 	JobId:Number,
-	JobTitle:String,
-	JobDescription:String,
+	Job:String,
+	// JobDescription:String,
 	JobScheduledTime:Date,
 	JobCreatedTime:Date,
 	JobDoneTime:Date,
 	JobCancelTime:Date,
-	JobLocation:String,
+	//JobLocation:String,
 	JobStatus:Number,
 	JobTimelineStatus:String,
-	JobRating:Number,
+	//JobRating:Number,
 	JobFeedback:String,
 	JobCreatedBy:String,
 	EmployeeDetails:{
@@ -31,7 +31,7 @@ var JobSchema = new Schema({
 		LastName:String,
 		PrimaryPhone:Number,
 		SecondaryPhone:Number,		
-		Location:String,
+		//Location:String,
 		Address:String		
 	},
 	StartedLocation: {
