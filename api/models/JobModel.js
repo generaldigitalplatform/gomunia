@@ -8,12 +8,12 @@ var JobSchema = new Schema({
 	Job:String,
 	// JobDescription:String,
 	JobScheduledTime:Date,
-	JobCreatedTime:Date,
-	JobDoneTime:Date,
-	JobCancelTime:Date,
+	// JobCreatedTime:Date,
+	// JobDoneTime:Date,
+	// JobCancelTime:Date,
 	//JobLocation:String,
 	JobStatus:Number,
-	JobTimelineStatus:String,
+	//JobTimelineStatus:String,
 	//JobRating:Number,
 	JobFeedback:String,
 	JobCreatedBy:String,
@@ -22,15 +22,16 @@ var JobSchema = new Schema({
 		LastName:String,
 		EmployeeId:String,
 		Email:String,
-		PrimaryPhone:Number,
-		SecondaryPhone:Number,
+		PrimaryPhone:String,
+		SecondaryPhone:String,
 		EmployerId:String		
 	},
 	CustomerDetails:{
 		FirstName:String,
 		LastName:String,
-		PrimaryPhone:Number,
-		SecondaryPhone:Number,		
+		PrimaryPhone:String,
+		SecondaryPhone:String,
+		email:String,		
 		//Location:String,
 		Address:String		
 	},
@@ -57,6 +58,17 @@ var JobSchema = new Schema({
 	    DateTime:Date	
 	},
 	CancelledLocation: {
+	    // type: {
+	    //   type: "String",
+	    //   required: true,
+	    //   enum: ['Point', 'LineString', 'Polygon'],
+	    //   default: 'Point'
+	    // },
+	    Coordinates:[Number],
+	    Area:String,
+	    DateTime:Date	
+	},
+	DoneLocation: {
 	    // type: {
 	    //   type: "String",
 	    //   required: true,

@@ -22,7 +22,8 @@ module.exports = function(app){
   	apiRoutes.use('/employee', jobRoutes);
 
     jobRoutes.get('/job',requireAuth, AuthenticationController.roleAuthorization(['employee','manager','admin']), jobController.findAllJobs);
-    jobRoutes.post('/job',requireAuth, AuthenticationController.roleAuthorization(['employee','manager','admin']), jobController.createNewJob);
+    jobRoutes.post('/job', jobController.createNewJob);
+  //  jobRoutes.post('/job',requireAuth, AuthenticationController.roleAuthorization(['employee','manager','admin']), jobController.createNewJob);
     jobRoutes.post('/jobs',jobController.createNewJobs);
 
     jobRoutes.get('/job/:Id',requireAuth, AuthenticationController.roleAuthorization(['employee','manager','admin']), jobController.findJobById);

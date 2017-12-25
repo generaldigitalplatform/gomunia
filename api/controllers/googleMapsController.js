@@ -69,7 +69,15 @@ exports.findGeoLocation = function(req,res){
 							"Coordinates": [lat,lng]							
 		        	}
 		        }
-		    } 
+		    } else if(action === 'done'){
+		    	actionData = {
+		        		"DoneLocation" :{
+							"DateTime": donedatetime,
+							"Area": address,
+							"Coordinates": [lat,lng]							
+		        	}
+		        }
+		    }  
 	    	var putStartJob = {     
 		        uri:db.job + objectId,
 		        method: 'PUT',
