@@ -31,7 +31,7 @@ var JobSchema = new Schema({
 		LastName:String,
 		PrimaryPhone:String,
 		SecondaryPhone:String,
-		email:String,		
+		Email:String,		
 		//Location:String,
 		Address:String		
 	},
@@ -46,17 +46,17 @@ var JobSchema = new Schema({
 	    Area:String,
 	    DateTime:Date
 	},
-	ReachedLocation: {
-	    // type: {
-	    //   type: "String",
-	    //   required: true,
-	    //   enum: ['Point', 'LineString', 'Polygon'],
-	    //   default: 'Point'
-	    // },
-	  Coordinates:[Number],
-	    Area:String,
-	    DateTime:Date	
-	},
+	// ReachedLocation: {
+	//     // type: {
+	//     //   type: "String",
+	//     //   required: true,
+	//     //   enum: ['Point', 'LineString', 'Polygon'],
+	//     //   default: 'Point'
+	//     // },
+	//   Coordinates:[Number],
+	//     Area:String,
+	//     DateTime:Date	
+	// },
 	CancelledLocation: {
 	    // type: {
 	    //   type: "String",
