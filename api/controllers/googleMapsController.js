@@ -10,7 +10,8 @@ exports.findGeoLocation = function(req,res){
 	var action = req.body.action;
 	var startdatetime = req.body.startdatetime;
 	var reachdatetime = req.body.reachdatetime;
-	var canceldatetime = req.body.canceldatetime; 
+	var canceldatetime = req.body.canceldatetime;
+	var donedatetime = req.body.donedatetime;  
 
 	var objectId = req.body.objectId;
 	var actionData;
