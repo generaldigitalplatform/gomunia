@@ -8,6 +8,7 @@ exports.findGeoLocation = function(req,res){
 	var lat = req.body.geo.lat; 
 	var lng = req.body.geo.lng;
 	var jobStatus = req.body.jobstatus;
+	var jobFeedback = req.body.jobfeedback;
 	var action = req.body.action;
 	var startdatetime = req.body.startdatetime;
 	var reachdatetime = req.body.reachdatetime;
@@ -50,6 +51,7 @@ exports.findGeoLocation = function(req,res){
 	    	if(action==='started'){
 		        	actionData = {
 		        		"JobStatus":jobStatus,
+		        		"JobFeedback":jobFeedback,
 		        		"StartedLocation" :{
 							"DateTime": startdatetime,
 							"Area": address,
@@ -59,6 +61,7 @@ exports.findGeoLocation = function(req,res){
 		    } else if(action === 'reached'){
 		    	actionData = {
 		    			"JobStatus":jobStatus,
+		    			"JobFeedback":jobFeedback,
 		        		"ReachedLocation" :{
 							"DateTime": reachdatetime,
 							"Area": address,
@@ -68,6 +71,7 @@ exports.findGeoLocation = function(req,res){
 		    }else if(action === 'cancelled'){
 		    	actionData = {
 		    			"JobStatus":jobStatus,
+		    			"JobFeedback":jobFeedback,
 		        		"CancelledLocation" :{
 							"DateTime": canceldatetime,
 							"Area": address,
@@ -77,6 +81,7 @@ exports.findGeoLocation = function(req,res){
 		    } else if(action === 'done'){
 		    	actionData = {
 		    			"JobStatus":jobStatus,
+		    			"JobFeedback":jobFeedback,
 		        		"DoneLocation" :{
 							"DateTime": donedatetime,
 							"Area": address,
